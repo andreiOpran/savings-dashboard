@@ -135,7 +135,7 @@ function Kpis({ data }: { data: AppData }) {
   const rows = history(data);
   const last = rows[rows.length - 1];
   const prev = rows[rows.length - 2];
-  // Headline numbers always use today's De primit / Goals, not the frozen month values.
+  // Headline numbers use today's de primit list and goals, not the values recorded for the month.
   const balance = last?.balance ?? 0;
   const rec = receivablesTotal(data);
   const goals = goalsRemaining(data);

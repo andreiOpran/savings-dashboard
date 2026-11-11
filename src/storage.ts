@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AppData } from './types';
+import type { AppData, Snapshot } from './types';
 
 const KEY = 'economii:data:v1';
 
@@ -25,7 +25,18 @@ export function parseData(raw: unknown): AppData {
     plan: { ...base.plan, ...d.plan },
     receivables: Array.isArray(d.receivables) ? d.receivables : [],
     goals: Array.isArray(d.goals) ? d.goals : [],
-    snapshots: Array.isArray(d.snapshots) ? d.snapshots : [],
+    snapshots: Array.isArray(d.snapshots) ? d.snapshots.map(migrateSnapshot) : [],
+  };
+}
+
+/** v0.1 stored hidden "frozen" totals; turn them into the editable per-month fields. */
+function migrateSnapshot(s: Snapshot & { frozen?: { receivables: number; goals: number } }): Snapshot {
+  if (!s.frozen) return s;
+  const { frozen, ...rest } = s;
+  return {
+    ...rest,
+    receivablesExpr: rest.receivablesExpr ?? String(Math.round(frozen.receivables * 100) / 100),
+    goals: rest.goals ?? frozen.goals,
   };
 }
 

@@ -124,7 +124,7 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--good-mar
 /* Chart */
 .chart { position: relative; }
 .chart-plot { position: relative; }
-.chart svg { display: block; touch-action: pan-y; }
+.chart svg { display: block; max-width: 100%; touch-action: pan-y; }
 .legend { list-style: none; padding: 0; margin: 0 0 8px; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--ink-2); }
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
 .swatch { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: currentColor; flex: none; }
@@ -149,11 +149,15 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--good-mar
 .tip-row.total { border-top: 1px solid var(--border); padding-top: 4px; margin-top: 2px; }
 .empty { padding: 40px 0; text-align: center; color: var(--muted); }
 
-.add-month { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.add-month { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 .add-month label { display: grid; gap: 4px; font-size: 13px; }
 .add-month input { border-color: var(--border); background: var(--page); padding: 7px 10px; }
 .add-month .grow { min-width: 180px; }
-.add-month .preview { font-size: 13px; align-self: center; }
+.add-month .preview { font-size: 12px; min-height: 1.2em; }
+.add-month em { font-style: normal; }
+.add-month > .primary { margin-top: 22px; }
+button.linkish { all: unset; cursor: pointer; color: var(--accent); font-size: 12px; }
+button.linkish:focus-visible { outline: 2px solid var(--accent); border-radius: 3px; }
 
 /* Rows */
 .rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
@@ -219,7 +223,12 @@ details.idle summary { cursor: pointer; font-size: 13px; color: var(--muted); pa
 .history .neg { color: var(--bad); }
 .history .amount input { width: 110px; }
 .dotmark { color: var(--muted); margin-left: 2px; cursor: help; }
-@media (max-width: 560px) { .hide-sm { display: none; } }
+.history td.num .expr { vertical-align: middle; }
+.history .unrecorded input::placeholder { color: var(--muted); opacity: 1; font-style: italic; }
+.history .strong { font-weight: 600; }
+@media (max-width: 560px) { .history .amount input { width: 72px; padding-left: 4px; padding-right: 4px; } .history td, .history th { padding-left: 4px; padding-right: 4px; } }
+.show-sm { display: none; }
+@media (max-width: 560px) { .hide-sm { display: none; } .show-sm { display: inline; } }
 
 .footer { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0 32px; font-size: 13px; }
 

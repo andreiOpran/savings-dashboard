@@ -28,17 +28,20 @@ export interface Receivable {
   received: boolean;
 }
 
-/** End-of-month balance. */
+/** What you had at the end of a month. */
 export interface Snapshot {
   /** YYYY-MM */
   month: string;
+  /** Total balance across accounts (expression). */
   expr: string;
-  note?: string;
   /**
-   * Receivables / goals values at the moment the month was recorded.
-   * When absent (e.g. imported history) the current values are used, like the sheet did.
+   * De primit at the end of that month (expression). When absent (months imported
+   * from the sheet) today's de primit total is used, like the sheet did.
    */
-  frozen?: { receivables: number; goals: number };
+  receivablesExpr?: string;
+  /** Goals still to pay when the month was recorded (RON). Absent = today's value. */
+  goals?: number;
+  note?: string;
 }
 
 /** The "Numar salariu" block: how the salary savings are split. */

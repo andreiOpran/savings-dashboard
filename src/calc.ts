@@ -50,7 +50,10 @@ export interface HistoryRow {
   withReceivables: number;
   goals: number;
   untilGoals: number;
-  frozen: boolean;
+  receivables: number;
+  /** false = de primit wasn't recorded for this month; today's total is used. */
+  hasReceivables: boolean;
+  hasGoals: boolean;
   snapshot: Snapshot;
 }
 
@@ -61,15 +64,18 @@ export function history(data: AppData): HistoryRow[] {
     .sort((a, b) => a.month.localeCompare(b.month))
     .map((s) => {
       const balance = num(s.expr);
-      const r = s.frozen?.receivables ?? rec;
-      const g = s.frozen?.goals ?? goals;
+      const hasReceivables = s.receivablesExpr != null && s.receivablesExpr !== '';
+      const r = hasReceivables ? num(s.receivablesExpr!) : rec;
+      const g = s.goals ?? goals;
       return {
         month: s.month,
         balance,
         withReceivables: balance + r,
         goals: g,
         untilGoals: balance + r - g,
-        frozen: !!s.frozen,
+        receivables: r,
+        hasReceivables,
+        hasGoals: s.goals != null,
         snapshot: s,
       };
     });

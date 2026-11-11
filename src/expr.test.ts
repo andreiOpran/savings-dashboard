@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { evaluate } from './expr';
 import { goalStats, history, salaryPlan } from './calc';
-import { emptyData } from './storage';
+import { emptyData, parseData } from './storage';
 
 describe('evaluate', () => {
   it.each([
@@ -34,14 +34,21 @@ describe('calc', () => {
     expect(s.progress).toBeCloseTo(2000 / 3000);
   });
 
-  it('history uses frozen values when present', () => {
+  it('history uses each month\'s recorded de primit, falling back to today\'s', () => {
     const d = emptyData();
     d.receivables.push({ id: 'r', label: 'X', expr: '100', currency: 'RON', received: false });
     d.snapshots.push({ month: '2026-01', expr: '1000' });
-    d.snapshots.push({ month: '2026-02', expr: '2000', frozen: { receivables: 0, goals: 500 } });
+    d.snapshots.push({ month: '2026-02', expr: '2000', receivablesExpr: '300+50', goals: 500 });
     const [a, b] = history(d);
     expect(a.withReceivables).toBe(1100);
-    expect(b.untilGoals).toBe(1500);
+    expect(a.hasReceivables).toBe(false);
+    expect(b.withReceivables).toBe(2350);
+    expect(b.untilGoals).toBe(1850);
+  });
+
+  it('migrates old frozen snapshots', () => {
+    const d = parseData({ ...emptyData(), snapshots: [{ month: '2026-03', expr: '1', frozen: { receivables: 5290, goals: 28653.18 } }] });
+    expect(d.snapshots[0]).toEqual({ month: '2026-03', expr: '1', receivablesExpr: '5290', goals: 28653.18 });
   });
 
   it('salary plan matches the sheet', () => {

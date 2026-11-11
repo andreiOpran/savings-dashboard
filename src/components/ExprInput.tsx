@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { evaluate, isFormula } from '../expr';
 
 interface Props {
@@ -16,7 +16,10 @@ interface Props {
 export function ExprInput({ value, onChange, ariaLabel, placeholder, className }: Props) {
   const [draft, setDraft] = useState(value);
   const [focused, setFocused] = useState(false);
-  useEffect(() => { if (!focused) setDraft(value); }, [value, focused]);
+  const focusedRef = useRef(false);
+  const cancelRef = useRef(false);
+  // Pick up outside changes to the value, but never clobber what's being typed.
+  useEffect(() => { if (!focusedRef.current) setDraft(value); }, [value]);
 
   const result = evaluate(draft);
   const invalid = result === null;
@@ -26,7 +29,9 @@ export function ExprInput({ value, onChange, ariaLabel, placeholder, className }
   const shown = focused || invalid || !formula ? draft : String(Math.round(result! * 100) / 100);
 
   const commit = () => {
+    focusedRef.current = false;
     setFocused(false);
+    if (cancelRef.current) { cancelRef.current = false; setDraft(value); return; }
     if (!invalid && draft !== value) onChange(draft.trim().replace(/^=/, '').replace(/\s+/g, ''));
     else if (invalid) setDraft(value);
   };
@@ -39,12 +44,12 @@ export function ExprInput({ value, onChange, ariaLabel, placeholder, className }
         aria-invalid={invalid}
         placeholder={placeholder}
         value={shown}
-        onFocus={() => setFocused(true)}
+        onFocus={() => { focusedRef.current = true; setFocused(true); }}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-          if (e.key === 'Escape') { setDraft(value); setFocused(false); }
+          if (e.key === 'Escape') { cancelRef.current = true; (e.target as HTMLInputElement).blur(); }
         }}
       />
       {showPreview && <span className="expr-preview">= {Math.round(result! * 100) / 100}</span>}

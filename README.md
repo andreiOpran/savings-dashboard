@@ -2,7 +2,7 @@
 
 A private savings dashboard that replaces the **Economii** sheet of `Economii_moto.xlsx`.
 
-- **Monthly history**: record your total balance each month; chart of balance, balance + money owed, and what the goals need.
+- **Monthly history**: record your balance *and* de primit each month (real total = balance + de primit); chart of balance, real total, and what the goals need.
 - **De primit**: money people owe you, ticked off when received.
 - **Goals**: budgets with line items (Motor, Echipament, Vacanta, RCA…), per-item *paid* ticks, RON or EUR, progress bars.
 - **Salary split**: the "Numar salariu" block (savings → stocks / XTB / ING).

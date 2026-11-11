@@ -32,6 +32,7 @@ export function HistoryChart({ rows }: { rows: HistoryRow[] }) {
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    setWidth(el.clientWidth); // measure before first paint so phones never get a 600px flash
     const ro = new ResizeObserver(([e]) => setWidth(e.contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
