@@ -178,6 +178,13 @@ def main(path):
                 if not isinstance(d, datetime):
                     continue
                 coord = f"{openpyxl.utils.get_column_letter(c)}{r + 1}"
+                raw = str(s.text(coord) or "")
+                # "=32119-E2": accounts total minus the ING salary savings (salary split, E2).
+                m = re.fullmatch(r"=\s*(\d+(?:\.\d+)?)\s*-\s*\$?E\$?2\s*", raw)
+                if m:
+                    snapshots.append({"month": d.strftime("%Y-%m"), "expr": m.group(1),
+                                      "ingExpr": num_str(s.value("E2") or 0)})
+                    continue
                 e = s.expr(coord)
                 if e is not None:
                     snapshots.append({"month": d.strftime("%Y-%m"), "expr": e})

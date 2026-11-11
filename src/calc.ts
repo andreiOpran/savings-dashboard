@@ -46,6 +46,12 @@ export function goalsRemaining(data: AppData): number {
 
 export interface HistoryRow {
   month: string;
+  /** Total in accounts as entered. */
+  accounts: number;
+  /** ING salary savings taken out (0 when not recorded). */
+  ing: number;
+  hasIng: boolean;
+  /** accounts − ING */
   balance: number;
   withReceivables: number;
   goals: number;
@@ -63,12 +69,18 @@ export function history(data: AppData): HistoryRow[] {
   return [...data.snapshots]
     .sort((a, b) => a.month.localeCompare(b.month))
     .map((s) => {
-      const balance = num(s.expr);
+      const accounts = num(s.expr);
+      const hasIng = s.ingExpr != null && s.ingExpr !== '';
+      const ing = hasIng ? num(s.ingExpr!) : 0;
+      const balance = accounts - ing;
       const hasReceivables = s.receivablesExpr != null && s.receivablesExpr !== '';
       const r = hasReceivables ? num(s.receivablesExpr!) : rec;
       const g = s.goals ?? goals;
       return {
         month: s.month,
+        accounts,
+        ing,
+        hasIng,
         balance,
         withReceivables: balance + r,
         goals: g,

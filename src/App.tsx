@@ -59,7 +59,7 @@ export default function App() {
           <header className="card-head">
             <div>
               <h2>History</h2>
-              <p className="muted">Total balance at the end of each month</p>
+              <p className="muted">End of each month, after taking out the ING salary savings</p>
             </div>
           </header>
           <HistoryChart rows={history(data)} />

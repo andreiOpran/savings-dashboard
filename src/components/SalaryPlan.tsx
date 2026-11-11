@@ -45,6 +45,7 @@ export function SalaryPlan({ data, update }: { data: AppData; update: Update }) 
         <div><span className="muted">XTB free</span><b>{money(s.xtbEur, 'EUR')}</b></div>
         <div className="hl"><span className="muted">On ING</span><b>{money(s.ing)}</b></div>
       </div>
+      <p className="hint muted">The ING amount is subtracted from your accounts total when you record a month.</p>
     </section>
   );
 }

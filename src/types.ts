@@ -32,8 +32,13 @@ export interface Receivable {
 export interface Snapshot {
   /** YYYY-MM */
   month: string;
-  /** Total balance across accounts (expression). */
+  /** Total in all accounts (expression). Before Nov 2026 this was entered with ING already taken out. */
   expr: string;
+  /**
+   * Salary savings kept on ING, subtracted from the accounts total (expression).
+   * Pre-filled from the salary split. Absent = nothing to subtract.
+   */
+  ingExpr?: string;
   /**
    * De primit at the end of that month (expression). When absent (months imported
    * from the sheet) today's de primit total is used, like the sheet did.

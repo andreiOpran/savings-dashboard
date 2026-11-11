@@ -224,11 +224,13 @@ details.idle summary { cursor: pointer; font-size: 13px; color: var(--muted); pa
 .history .amount input { width: 110px; }
 .dotmark { color: var(--muted); margin-left: 2px; cursor: help; }
 .history td.num .expr { vertical-align: middle; }
+.history input::placeholder { color: var(--muted); opacity: 1; }
 .history .unrecorded input::placeholder { color: var(--muted); opacity: 1; font-style: italic; }
 .history .strong { font-weight: 600; }
 @media (max-width: 560px) { .history .amount input { width: 72px; padding-left: 4px; padding-right: 4px; } .history td, .history th { padding-left: 4px; padding-right: 4px; } }
 .show-sm { display: none; }
 @media (max-width: 560px) { .hide-sm { display: none; } .show-sm { display: inline; } }
+@media (max-width: 960px) { .hide-md { display: none; } }
 
 .footer { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0 32px; font-size: 13px; }
 

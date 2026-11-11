@@ -4,7 +4,7 @@ import { money, monthLabel } from '../format';
 
 const SERIES = [
   { key: 'balance', label: 'Balance', cls: 's1' },
-  { key: 'withReceivables', label: 'Balance + de primit', cls: 's2' },
+  { key: 'withReceivables', label: 'Real total (+ de primit)', cls: 's2' },
   { key: 'goals', label: 'Needed for goals', cls: 's3' },
 ] as const;
 

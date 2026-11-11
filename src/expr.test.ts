@@ -46,6 +46,17 @@ describe('calc', () => {
     expect(b.untilGoals).toBe(1850);
   });
 
+  it('subtracts the ING salary savings from the accounts total', () => {
+    const d = emptyData();
+    d.snapshots.push({ month: '2026-10', expr: '29543' });
+    d.snapshots.push({ month: '2026-11', expr: '32119', ingExpr: '4625', receivablesExpr: '5290', goals: 28653 });
+    const [oct, nov] = history(d);
+    expect(oct.balance).toBe(29543);
+    expect(oct.hasIng).toBe(false);
+    expect(nov.balance).toBe(27494);
+    expect(nov.untilGoals).toBe(27494 + 5290 - 28653);
+  });
+
   it('migrates old frozen snapshots', () => {
     const d = parseData({ ...emptyData(), snapshots: [{ month: '2026-03', expr: '1', frozen: { receivables: 5290, goals: 28653.18 } }] });
     expect(d.snapshots[0]).toEqual({ month: '2026-03', expr: '1', receivablesExpr: '5290', goals: 28653.18 });
