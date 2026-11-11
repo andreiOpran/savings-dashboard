@@ -1,4 +1,5 @@
 import { num } from './expr';
+import { uid } from './id';
 import type { AppData, Currency, Goal, Snapshot } from './types';
 
 export const toRon = (amount: number, currency: Currency, eurRon: number) =>
@@ -27,6 +28,18 @@ export function goalStats(goal: Goal, eurRon: number): GoalStats {
     remainingRon: toRon(remaining, goal.currency, eurRon),
     progress,
     done: goal.items.length > 0 && remaining <= 0,
+  };
+}
+
+/** Copy a goal (typically a finished one, like last summer's vacation) as a fresh plan. */
+export function goalFromTemplate(goal: Goal, name: string): Goal {
+  return {
+    ...goal,
+    id: uid(),
+    name,
+    archived: false,
+    countInTotal: true,
+    items: goal.items.map((it) => ({ ...it, id: uid(), paid: false })),
   };
 }
 

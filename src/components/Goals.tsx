@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AppData, Goal, GoalItem } from '../types';
-import { goalStats, goalsRemaining } from '../calc';
+import { goalFromTemplate, goalStats, goalsRemaining } from '../calc';
 import { num } from '../expr';
 import { money, uid } from '../format';
 import { ExprInput, TextInput } from './ExprInput';
@@ -9,79 +10,93 @@ import { CurrencyToggle } from './Receivables';
 type Update = (fn: (d: AppData) => AppData) => void;
 
 export function Goals({ data, update }: { data: AppData; update: Update }) {
-  const [showArchived, setShowArchived] = useState(false);
+  const { t } = useTranslation();
+  const [openId, setOpenId] = useState<string | null>(null);
   const setGoal = (id: string, fn: (g: Goal) => Goal) =>
     update((d) => ({ ...d, goals: d.goals.map((g) => (g.id === id ? fn(g) : g)) }));
-  const add = () => update((d) => ({
-    ...d,
-    goals: [...d.goals, {
-      id: uid(), name: 'New goal', currency: 'RON', countInTotal: true, archived: false,
-      items: [{ id: uid(), label: 'Item', expr: '0', paid: false }],
-    }],
-  }));
+  const remove = (id: string) => update((d) => ({ ...d, goals: d.goals.filter((x) => x.id !== id) }));
+  const add = () => {
+    const g: Goal = {
+      id: uid(), name: t('goals.newName'), currency: 'RON', countInTotal: true, archived: false,
+      items: [{ id: uid(), label: t('goals.newItem'), expr: '0', paid: false }],
+    };
+    update((d) => ({ ...d, goals: [...d.goals, g] }));
+    setOpenId(g.id);
+  };
+  const fromTemplate = (goal: Goal) => {
+    const g = goalFromTemplate(goal, t('goals.templateName', { name: goal.name }));
+    update((d) => ({ ...d, goals: [...d.goals, g] }));
+    setOpenId(g.id);
+  };
 
   const active = data.goals.filter((g) => !g.archived);
-  const archived = data.goals.filter((g) => g.archived);
+  const past = data.goals.filter((g) => g.archived);
+  const card = (g: Goal) => (
+    <GoalCard key={g.id} goal={g} eurRon={data.settings.eurRon}
+      open={openId === g.id} onToggle={() => setOpenId(openId === g.id ? null : g.id)}
+      onChange={(fn) => setGoal(g.id, fn)} onDelete={() => remove(g.id)} onTemplate={() => fromTemplate(g)} />
+  );
 
   return (
     <section className="card">
       <header className="card-head">
         <div>
-          <h2>Goals</h2>
-          <p className="muted">What's still left to pay</p>
+          <h2>{t('goals.title')}</h2>
+          <p className="muted">{t('goals.subtitle')}</p>
         </div>
         <div className="card-total">{money(goalsRemaining(data))}</div>
       </header>
-      <div className="goals">
-        {active.map((g) => (
-          <GoalCard key={g.id} goal={g} eurRon={data.settings.eurRon}
-            onChange={(fn) => setGoal(g.id, fn)}
-            onDelete={() => update((d) => ({ ...d, goals: d.goals.filter((x) => x.id !== g.id) }))} />
-        ))}
-      </div>
-      <button className="add" onClick={add}>+ New goal</button>
-      {archived.length > 0 && (
-        <details className="idle" open={showArchived} onToggle={(e) => setShowArchived((e.target as HTMLDetailsElement).open)}>
-          <summary>{archived.length} archived</summary>
-          <div className="goals">
-            {archived.map((g) => (
-              <GoalCard key={g.id} goal={g} eurRon={data.settings.eurRon}
-                onChange={(fn) => setGoal(g.id, fn)}
-                onDelete={() => update((d) => ({ ...d, goals: d.goals.filter((x) => x.id !== g.id) }))} />
-            ))}
-          </div>
+      <div className="goals">{active.map(card)}</div>
+      <button className="add" onClick={add}>{t('goals.add')}</button>
+      {past.length > 0 && (
+        <details className="idle">
+          <summary>{t('goals.past', { count: past.length })}</summary>
+          <div className="goals">{past.map(card)}</div>
         </details>
       )}
     </section>
   );
 }
 
-function GoalCard({ goal, eurRon, onChange, onDelete }: {
-  goal: Goal; eurRon: number; onChange: (fn: (g: Goal) => Goal) => void; onDelete: () => void;
+function GoalCard({ goal, eurRon, open, onToggle, onChange, onDelete, onTemplate }: {
+  goal: Goal; eurRon: number; open: boolean; onToggle: () => void;
+  onChange: (fn: (g: Goal) => Goal) => void; onDelete: () => void; onTemplate: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
   const s = goalStats(goal, eurRon);
+  const past = goal.archived;
   const setItem = (id: string, patch: Partial<GoalItem>) =>
     onChange((g) => ({ ...g, items: g.items.map((it) => (it.id === id ? { ...it, ...patch } : it)) }));
 
   return (
-    <article className={`goal ${s.done ? 'is-done' : ''} ${goal.countInTotal ? '' : 'is-excluded'}`}>
-      <button className="goal-summary" aria-expanded={open} onClick={() => setOpen(!open)}>
+    <article className={`goal ${s.done ? 'is-done' : ''} ${goal.countInTotal || past ? '' : 'is-excluded'} ${past ? 'is-past' : ''}`}>
+      <button className="goal-summary" aria-expanded={open} onClick={onToggle}>
         <span className="goal-name">
           {goal.name}
-          {s.done && <span className="badge good">✓ Done</span>}
-          {!goal.countInTotal && <span className="badge">Not in total</span>}
+          {past ? <span className="badge">{t('goals.pastBadge')}</span> : <>
+            {s.done && <span className="badge good">✓ {t('goals.done')}</span>}
+            {!goal.countInTotal && <span className="badge">{t('goals.notInTotal')}</span>}
+          </>}
         </span>
         <span className="goal-left">
-          {s.done ? money(s.total, goal.currency) : <>{money(s.remaining, goal.currency)} <small>left</small></>}
-          {goal.currency === 'EUR' && !s.done && <small className="muted"> ≈ {money(s.remainingRon)}</small>}
+          {past || s.done
+            ? <>{money(s.total, goal.currency)} {past && <small>{t('goals.total')}</small>}</>
+            : <>{money(s.remaining, goal.currency)} <small>{t('goals.left')}</small></>}
+          {goal.currency === 'EUR' && !s.done && !past && <small className="muted"> ≈ {money(s.remainingRon)}</small>}
         </span>
-        <span className="bar" role="progressbar" aria-valuemin={0} aria-valuemax={100}
-          aria-valuenow={Math.round(s.progress * 100)} aria-label={`${goal.name} progress`}>
-          <span style={{ width: `${s.progress * 100}%` }} />
-        </span>
+        {!past && (
+          <span className="bar" role="progressbar" aria-valuemin={0} aria-valuemax={100}
+            aria-valuenow={Math.round(s.progress * 100)} aria-label={t('goals.progress', { name: goal.name })}>
+            <span style={{ width: `${s.progress * 100}%` }} />
+          </span>
+        )}
         <span className="goal-meta muted">
-          {money(s.paid, goal.currency)} of {money(s.total, goal.currency)} · {goal.items.filter((i) => i.paid).length}/{goal.items.length} paid
+          {past
+            ? t('goals.pastSummary', { count: goal.items.length })
+            : t('goals.paidOf', {
+                paid: money(s.paid, goal.currency), total: money(s.total, goal.currency),
+                done: goal.items.filter((i) => i.paid).length, count: goal.items.length,
+              })}
           <span className="chev" aria-hidden>{open ? '▴' : '▾'}</span>
         </span>
       </button>
@@ -89,32 +104,41 @@ function GoalCard({ goal, eurRon, onChange, onDelete }: {
       {open && (
         <div className="goal-body">
           <div className="goal-tools">
-            <TextInput className="grow" value={goal.name} ariaLabel="Goal name" onChange={(name) => onChange((g) => ({ ...g, name }))} />
+            <TextInput className="grow" value={goal.name} ariaLabel={t('goals.name')} onChange={(name) => onChange((g) => ({ ...g, name }))} />
             <CurrencyToggle value={goal.currency} onChange={(currency) => onChange((g) => ({ ...g, currency }))} />
           </div>
           <ul className="rows">
             {goal.items.map((it) => (
-              <li key={it.id} className={`row ${it.paid ? 'is-done' : ''} ${num(it.expr) < 0 ? 'is-offset' : ''}`}>
-                <label className="check" title={it.paid ? 'Mark as unpaid' : 'Mark as paid'}>
-                  <input type="checkbox" checked={it.paid} onChange={(e) => setItem(it.id, { paid: e.target.checked })} />
-                </label>
-                <TextInput className="grow" value={it.label} ariaLabel="Item" onChange={(label) => setItem(it.id, { label })} />
-                <ExprInput className="amount" value={it.expr} ariaLabel={`Cost of ${it.label}`} onChange={(expr) => setItem(it.id, { expr })} />
-                <button className="icon ghost" aria-label={`Delete ${it.label}`}
+              <li key={it.id} className={`row ${it.paid && !past ? 'is-done' : ''} ${num(it.expr) < 0 ? 'is-offset' : ''}`}>
+                {!past && (
+                  <label className="check" title={it.paid ? t('goals.markUnpaid') : t('goals.markPaid')}>
+                    <input type="checkbox" checked={it.paid} onChange={(e) => setItem(it.id, { paid: e.target.checked })} />
+                  </label>
+                )}
+                <TextInput className="grow" value={it.label} ariaLabel={t('goals.item')} onChange={(label) => setItem(it.id, { label })} />
+                <ExprInput className="amount" value={it.expr} ariaLabel={t('goals.costOf', { label: it.label })} onChange={(expr) => setItem(it.id, { expr })} />
+                <button className="icon ghost" aria-label={t('goals.deleteItem', { label: it.label })}
                   onClick={() => onChange((g) => ({ ...g, items: g.items.filter((x) => x.id !== it.id) }))}>×</button>
               </li>
             ))}
           </ul>
-          <p className="hint muted">Tick items once paid. Use a negative amount for money you get towards it (e.g. −2100 from parents).</p>
+          <p className="hint muted">{past ? t('goals.templateHint') : t('goals.hint')}</p>
           <div className="goal-actions">
-            <button className="add" onClick={() => onChange((g) => ({ ...g, items: [...g.items, { id: uid(), label: 'Item', expr: '0', paid: false }] }))}>+ Item</button>
-            <span className="spacer" />
-            <label className="switch">
-              <input type="checkbox" checked={goal.countInTotal} onChange={(e) => onChange((g) => ({ ...g, countInTotal: e.target.checked }))} />
-              Count in goals total
-            </label>
-            <button className="ghost" onClick={() => onChange((g) => ({ ...g, archived: !g.archived }))}>{goal.archived ? 'Unarchive' : 'Archive'}</button>
-            <button className="ghost danger" onClick={() => confirm(`Delete goal “${goal.name}”?`) && onDelete()}>Delete</button>
+            {past ? (
+              <button className="primary" onClick={onTemplate}>{t('goals.template')}</button>
+            ) : (
+              <>
+                <button className="add" onClick={() => onChange((g) => ({ ...g, items: [...g.items, { id: uid(), label: t('goals.newItem'), expr: '0', paid: false }] }))}>{t('goals.addItem')}</button>
+                <span className="spacer" />
+                <label className="switch">
+                  <input type="checkbox" checked={goal.countInTotal} onChange={(e) => onChange((g) => ({ ...g, countInTotal: e.target.checked }))} />
+                  {t('goals.countInTotal')}
+                </label>
+              </>
+            )}
+            {past && <span className="spacer" />}
+            <button className="ghost" onClick={() => onChange((g) => ({ ...g, archived: !g.archived }))}>{past ? t('goals.restore') : t('goals.archive')}</button>
+            <button className="ghost danger" onClick={() => confirm(t('goals.deleteConfirm', { name: goal.name })) && onDelete()}>{t('goals.delete')}</button>
           </div>
         </div>
       )}

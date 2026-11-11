@@ -165,8 +165,10 @@ def main(path):
             goals.append({"id": uid(), "name": label, "currency": "RON",
                           "items": [{"id": uid(), "label": label, "expr": expr, "paid": bool(paid)}],
                           "countInTotal": True, "archived": False})
-    vac = section_goal(s, "Vacanta", "RON", count=False)  # not in the sheet's Goals total
+    # Vacanta is a finished trip kept for reference (and as a template for the next one).
+    vac = section_goal(s, "Vacanta", "RON", count=False)
     if vac:
+        vac["archived"] = True
         goals.append(vac)
 
     # History (Data / Actual rows)

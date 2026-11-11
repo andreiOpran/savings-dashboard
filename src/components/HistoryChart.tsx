@@ -1,11 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { HistoryRow } from '../calc';
 import { money, monthLabel } from '../format';
 
 const SERIES = [
-  { key: 'balance', label: 'Balance', cls: 's1' },
-  { key: 'withReceivables', label: 'Real total (+ de primit)', cls: 's2' },
-  { key: 'goals', label: 'Needed for goals', cls: 's3' },
+  { key: 'balance', label: 'series.balance', cls: 's1' },
+  { key: 'withReceivables', label: 'series.realTotal', cls: 's2' },
+  { key: 'goals', label: 'series.goals', cls: 's3' },
 ] as const;
 
 const PAD = { top: 16, right: 16, bottom: 28, left: 56 };
@@ -24,6 +25,7 @@ function niceTicks(min: number, max: number, count = 4): number[] {
 const short = (v: number) => (Math.abs(v) >= 1000 ? `${Math.round(v / 100) / 10}k` : `${Math.round(v)}`);
 
 export function HistoryChart({ rows }: { rows: HistoryRow[] }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(600);
   const [hover, setHover] = useState<number | null>(null);
@@ -39,7 +41,7 @@ export function HistoryChart({ rows }: { rows: HistoryRow[] }) {
   }, []);
 
   if (rows.length === 0) {
-    return <div className="empty">Add your first month to see the chart.</div>;
+    return <div className="empty">{t('history.empty')}</div>;
   }
 
   const values = rows.flatMap((r) => [r.balance, r.withReceivables, r.goals]);
@@ -68,15 +70,15 @@ export function HistoryChart({ rows }: { rows: HistoryRow[] }) {
 
   return (
     <div className="chart" ref={ref}>
-      <ul className="legend" aria-label="Legend">
+      <ul className="legend" aria-label={t('history.legend')}>
         {SERIES.map((s) => (
-          <li key={s.key}><span className={`swatch ${s.cls}`} />{s.label}</li>
+          <li key={s.key}><span className={`swatch ${s.cls}`} />{t(s.label)}</li>
         ))}
       </ul>
       <div className="chart-plot">
         <svg
           width={width} height={height} role="img"
-          aria-label={`Savings history, ${rows.length} months. Latest balance ${money(rows[last].balance)}.`}
+          aria-label={t('history.chartLabel', { count: rows.length, value: money(rows[last].balance) })}
           onPointerMove={onMove} onPointerLeave={() => setHover(null)}
         >
           {ticks.map((t) => (
@@ -104,11 +106,11 @@ export function HistoryChart({ rows }: { rows: HistoryRow[] }) {
             <strong>{monthLabel(rows[h].month)}</strong>
             {SERIES.map((s) => (
               <div key={s.key} className="tip-row">
-                <span className={`swatch ${s.cls}`} /><span>{s.label}</span><b>{money(rows[h][s.key])}</b>
+                <span className={`swatch ${s.cls}`} /><span>{t(s.label)}</span><b>{money(rows[h][s.key])}</b>
               </div>
             ))}
             <div className="tip-row total">
-              <span /><span>Free after goals</span><b>{money(rows[h].untilGoals)}</b>
+              <span /><span>{t('series.free')}</span><b>{money(rows[h].untilGoals)}</b>
             </div>
           </div>
         )}

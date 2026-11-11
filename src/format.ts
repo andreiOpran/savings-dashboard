@@ -1,3 +1,4 @@
+import i18n from './i18n';
 import type { Currency } from './types';
 
 const fmt0 = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 0 });
@@ -9,11 +10,14 @@ export const money = (v: number, currency: Currency = 'RON', precise = false) =>
 export const signedMoney = (v: number, currency: Currency = 'RON') =>
   `${v > 0 ? '+' : v < 0 ? '−' : ''}${money(Math.abs(v), currency)}`;
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
+/** "Nov 2026" / "nov. 2026", following the UI language. */
 export function monthLabel(month: string, withYear = true): string {
   const [y, m] = month.split('-').map(Number);
-  return withYear ? `${MONTHS[m - 1]} ${y}` : MONTHS[m - 1];
+  return new Intl.DateTimeFormat(i18n.language, {
+    month: 'short',
+    ...(withYear ? { year: 'numeric' } : {}),
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(y, m - 1, 1)));
 }
 
-export const uid = () => Math.random().toString(36).slice(2, 10);
+export { uid } from './id';

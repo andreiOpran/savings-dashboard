@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { goalsRemaining, history, receivablesTotal } from './calc';
 import { money, monthLabel, signedMoney } from './format';
+import { LANGUAGES, type Lang } from './i18n';
 import { downloadJson, emptyData, fetchEurRon, readJsonFile, useAppData } from './storage';
 import type { AppData } from './types';
 import { HistoryChart } from './components/HistoryChart';
@@ -12,6 +14,7 @@ import { SalaryPlan } from './components/SalaryPlan';
 const RATE_TTL_MS = 12 * 60 * 60 * 1000;
 
 export default function App() {
+  const { t } = useTranslation();
   const { data, setData, update } = useAppData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +23,11 @@ export default function App() {
     if (!file) return;
     try {
       const d = await readJsonFile(file);
-      if (data && !confirm('Replace all current data with this backup?')) return;
+      if (data && !confirm(t('backup.replaceConfirm'))) return;
       setData(d);
       setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+    } catch {
+      setError(t('backup.invalid'));
     }
   };
 
@@ -36,13 +39,14 @@ export default function App() {
   if (!data) {
     return (
       <main className="onboarding">
-        <h1>Economii</h1>
-        <p className="muted">Your savings, goals and money owed to you — kept in this browser only.</p>
+        <div className="onboarding-lang"><LanguageSwitch /></div>
+        <h1>{t('app.title')}</h1>
+        <p className="muted">{t('app.tagline')}</p>
         <div className="onboarding-actions">
-          <button className="primary" onClick={() => fileRef.current?.click()}>Import backup (.json)</button>
-          <button onClick={() => setData(emptyData())}>Start empty</button>
+          <button className="primary" onClick={() => fileRef.current?.click()}>{t('app.importBackup')}</button>
+          <button onClick={() => setData(emptyData())}>{t('app.startEmpty')}</button>
         </div>
-        <p className="hint muted">Coming from the spreadsheet? Run <code>scripts/import_xlsx.py</code> on it to get a backup file.</p>
+        <p className="hint muted"><Trans i18nKey="app.fromSheet" components={{ code: <code /> }} /></p>
         {error && <p className="error">{error}</p>}
         {fileInput}
       </main>
@@ -58,8 +62,8 @@ export default function App() {
         <section className="card">
           <header className="card-head">
             <div>
-              <h2>History</h2>
-              <p className="muted">End of each month, after taking out the ING salary savings</p>
+              <h2>{t('history.title')}</h2>
+              <p className="muted">{t('history.subtitle')}</p>
             </div>
           </header>
           <HistoryChart rows={history(data)} />
@@ -75,15 +79,15 @@ export default function App() {
         </div>
 
         <section className="card">
-          <header className="card-head"><div><h2>Months</h2></div></header>
+          <header className="card-head"><div><h2>{t('history.months')}</h2></div></header>
           <HistoryTable data={data} update={update} />
         </section>
 
         <footer className="footer">
-          <span className="muted">Data lives only in this browser. Export a backup regularly.</span>
+          <span className="muted">{t('backup.footer')}</span>
           <span className="spacer" />
-          <button onClick={() => downloadJson(data)}>Export backup</button>
-          <button onClick={() => fileRef.current?.click()}>Import backup</button>
+          <button onClick={() => downloadJson(data)}>{t('backup.export')}</button>
+          <button onClick={() => fileRef.current?.click()}>{t('backup.import')}</button>
           {error && <span className="error">{error}</span>}
           {fileInput}
         </footer>
@@ -92,7 +96,20 @@ export default function App() {
   );
 }
 
+function LanguageSwitch() {
+  const { t, i18n } = useTranslation();
+  return (
+    <div className="lang" role="group" aria-label={t('app.language')}>
+      {(Object.keys(LANGUAGES) as Lang[]).map((lng) => (
+        <button key={lng} title={LANGUAGES[lng]} aria-pressed={i18n.language === lng}
+          onClick={() => i18n.changeLanguage(lng)}>{lng.toUpperCase()}</button>
+      ))}
+    </div>
+  );
+}
+
 function Header({ data, update }: { data: AppData; update: (fn: (d: AppData) => AppData) => void }) {
+  const { t, i18n } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [rateError, setRateError] = useState(false);
 
@@ -116,22 +133,24 @@ function Header({ data, update }: { data: AppData; update: (fn: (d: AppData) => 
   }, []);
 
   const updated = data.settings.eurRonUpdated
-    ? new Date(data.settings.eurRonUpdated).toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' })
-    : 'from import';
+    ? new Date(data.settings.eurRonUpdated).toLocaleString(i18n.language, { dateStyle: 'short', timeStyle: 'short' })
+    : t('rate.fromImport');
 
   return (
     <header className="topbar">
-      <h1>Economii</h1>
+      <h1>{t('app.title')}</h1>
       <span className="spacer" />
       <button className={`rate ${rateError ? 'stale' : ''}`} onClick={refresh} disabled={busy}
-        title={rateError ? 'Could not refresh — using the last known rate' : `ECB rate, updated ${updated}. Click to refresh.`}>
+        title={rateError ? t('rate.failed') : t('rate.updated', { date: updated })}>
         <span className="muted">EUR/RON</span> <b>{data.settings.eurRon.toFixed(4)}</b> <span aria-hidden>{busy ? '…' : '↻'}</span>
       </button>
+      <LanguageSwitch />
     </header>
   );
 }
 
 function Kpis({ data }: { data: AppData }) {
+  const { t } = useTranslation();
   const rows = history(data);
   const last = rows[rows.length - 1];
   const prev = rows[rows.length - 2];
@@ -143,28 +162,28 @@ function Kpis({ data }: { data: AppData }) {
   const delta = last && prev ? last.balance - prev.balance : null;
 
   return (
-    <section className="kpis" aria-label="Summary">
+    <section className="kpis" aria-label={t('kpi.summary')}>
       <div className="kpi">
-        <span className="kpi-label">Balance{last ? ` · ${monthLabel(last.month)}` : ''}</span>
+        <span className="kpi-label">{t('kpi.balance')}{last ? ` · ${monthLabel(last.month)}` : ''}</span>
         <span className="kpi-value">{money(balance)}</span>
         {delta !== null && (
-          <span className={`kpi-sub ${delta >= 0 ? 'up' : 'down'}`}>{delta >= 0 ? '▲' : '▼'} {signedMoney(delta)} vs {monthLabel(prev.month, false)}</span>
+          <span className={`kpi-sub ${delta >= 0 ? 'up' : 'down'}`}>{delta >= 0 ? '▲' : '▼'} {signedMoney(delta)} {t('kpi.vs', { month: monthLabel(prev.month, false) })}</span>
         )}
       </div>
       <div className="kpi">
-        <span className="kpi-label">De primit</span>
+        <span className="kpi-label">{t('kpi.receivables')}</span>
         <span className="kpi-value">{money(rec)}</span>
-        <span className="kpi-sub muted">{data.receivables.filter((r) => !r.received && r.expr !== '0').length} open</span>
+        <span className="kpi-sub muted">{t('kpi.open', { count: data.receivables.filter((r) => !r.received && r.expr !== '0').length })}</span>
       </div>
       <div className="kpi">
-        <span className="kpi-label">Goals left</span>
+        <span className="kpi-label">{t('kpi.goalsLeft')}</span>
         <span className="kpi-value">{money(goals)}</span>
-        <span className="kpi-sub muted">{data.goals.filter((g) => g.countInTotal && !g.archived).length} goals counted</span>
+        <span className="kpi-sub muted">{t('kpi.goalsCounted', { count: data.goals.filter((g) => g.countInTotal && !g.archived).length })}</span>
       </div>
       <div className={`kpi hero ${free < 0 ? 'neg' : 'pos'}`}>
-        <span className="kpi-label">Free after goals</span>
+        <span className="kpi-label">{t('kpi.free')}</span>
         <span className="kpi-value">{money(free)}</span>
-        <span className="kpi-sub">{free >= 0 ? '✓ All goals covered' : '! Short of goals'}</span>
+        <span className="kpi-sub">{free >= 0 ? `✓ ${t('kpi.covered')}` : `! ${t('kpi.short')}`}</span>
       </div>
     </section>
   );
