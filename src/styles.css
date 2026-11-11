@@ -91,13 +91,20 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--good-mar
 
 /* Layout */
 .topbar {
-  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px;
-  padding: 12px max(16px, calc((100vw - 1120px) / 2)); background: color-mix(in srgb, var(--page) 85%, transparent);
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; align-items: center; gap: 12px;
+  padding-block: 12px;
+  padding-left: max(16px, calc((100vw - 1120px) / 2), env(safe-area-inset-left, 0px));
+  padding-right: max(16px, calc((100vw - 1120px) / 2), env(safe-area-inset-right, 0px));
+  background: color-mix(in srgb, var(--page) 85%, transparent);
   backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
 }
-.rate { display: inline-flex; gap: 6px; align-items: baseline; border-radius: 999px; font-variant-numeric: tabular-nums; }
-.rate.stale b { color: var(--bad); }
-.page { max-width: 1120px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+.rate { display: inline-flex; gap: 6px; align-items: center; font-variant-numeric: tabular-nums; }
+.page {
+  max-width: 1120px; margin: 0 auto; display: grid; gap: 16px; padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* Paint the phone's status-bar band so content never scrolls visibly under it. */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--page); }
 .cols { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
 .stack { display: grid; gap: 16px; }
 @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
@@ -235,7 +242,7 @@ details.idle summary { cursor: pointer; font-size: 13px; color: var(--muted); pa
 .footer { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0 32px; font-size: 13px; }
 
 /* Onboarding */
-.onboarding { max-width: 460px; margin: 15vh auto; padding: 16px; display: grid; gap: 12px; text-align: center; }
+.onboarding { max-width: 460px; margin: 15vh auto; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 12px; text-align: center; }
 .onboarding h1 { font-size: 32px; }
 .onboarding-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .goal.is-past { background: transparent; }
@@ -246,3 +253,19 @@ details.idle summary { cursor: pointer; font-size: 13px; color: var(--muted); pa
 .lang button { border: 0; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 600; color: var(--muted); background: transparent; }
 .lang button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); }
 .onboarding-lang { display: flex; justify-content: center; }
+
+/* Hosted-page additions: in-page confirmations, sync status, editable rate */
+button.armed { color: var(--bad); border-color: var(--bad); background: var(--bad-wash); width: auto; padding: 0 8px; font-size: 13px; }
+.replace-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius);
+}
+.sync { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.sync-synced .sync-dot { background: var(--good-mark); }
+.sync-error .sync-dot { background: var(--bad); }
+.rate { padding: 2px 8px 2px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+.rate .rate-input input { width: 74px; text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; padding: 3px 4px; }
+.rate.stale .rate-input input { color: var(--bad); }
+.rate .icon { width: 26px; height: 26px; font-size: 15px; }
+@media (max-width: 480px) { .rate > .muted { display: none; } }

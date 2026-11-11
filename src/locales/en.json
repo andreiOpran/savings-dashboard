@@ -5,19 +5,26 @@
     "importBackup": "Import backup (.json)",
     "startEmpty": "Start empty",
     "fromSheet": "Coming from the spreadsheet? Run <code>scripts/import_xlsx.py</code> on it to get a backup file.",
-    "language": "Language"
+    "language": "Language",
+    "loading": "Loading your data…"
   },
   "backup": {
     "export": "Export backup",
     "import": "Import backup",
     "replaceConfirm": "Replace all current data with this backup?",
     "invalid": "This file isn't an Economii backup.",
-    "footer": "Data lives only in this browser. Export a backup regularly."
+    "replace": "Replace",
+    "cancel": "Cancel",
+    "saved": "Backup saved.",
+    "failed": "Couldn't save the backup here."
   },
   "rate": {
     "updated": "ECB rate, updated {{date}}. Click to refresh.",
     "fromImport": "from import",
-    "failed": "Couldn't refresh — using the last known rate"
+    "failed": "Couldn't refresh — using the last known rate",
+    "edit": "EUR/RON rate",
+    "refresh": "Refresh rate",
+    "manual": "Set by hand, last changed {{date}}."
   },
   "kpi": {
     "summary": "Summary",
@@ -152,5 +159,15 @@
     "xtbShort": "XTB free",
     "onIng": "On ING",
     "hint": "The ING amount is subtracted from your accounts total when you record a month."
+  },
+  "confirm": {
+    "again": "Click again to confirm",
+    "short": "Delete?"
+  },
+  "sync": {
+    "local": "Saved in this browser only. Export a backup regularly.",
+    "connecting": "Connecting…",
+    "synced": "Synced to your claude.ai account — same data on all your devices.",
+    "error": "Can't reach your claude.ai account right now. Changes are kept in this browser."
   }
 }

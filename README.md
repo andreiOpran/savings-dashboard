@@ -35,3 +35,17 @@ npm run dev     # http://localhost:5173
 npm test        # unit tests (formula evaluator + calculations)
 npm run build   # static site in dist/ (relative paths, GitHub Pages-ready)
 ```
+
+## Using it on your phone (private claude.ai Artifact)
+
+```bash
+npm run build:artifact   # → dist/economii-artifact.html, one self-contained page
+```
+
+Published as a private Artifact on claude.ai, the app:
+- saves your data to a private per-user record on your claude.ai account, so every device you open it on shows the same data (browser storage is only a local cache there);
+- exports backups through the claude.ai save dialog;
+- uses a hand-typed EUR/RON rate, because hosted pages can't call outside services.
+
+Only the app code is published; your data never goes into the page.
+

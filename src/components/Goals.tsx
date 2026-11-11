@@ -6,6 +6,7 @@ import { num } from '../expr';
 import { money, uid } from '../format';
 import { ExprInput, TextInput } from './ExprInput';
 import { CurrencyToggle } from './Receivables';
+import { ConfirmButton } from './ConfirmButton';
 
 type Update = (fn: (d: AppData) => AppData) => void;
 
@@ -138,7 +139,7 @@ function GoalCard({ goal, eurRon, open, onToggle, onChange, onDelete, onTemplate
             )}
             {past && <span className="spacer" />}
             <button className="ghost" onClick={() => onChange((g) => ({ ...g, archived: !g.archived }))}>{past ? t('goals.restore') : t('goals.archive')}</button>
-            <button className="ghost danger" onClick={() => confirm(t('goals.deleteConfirm', { name: goal.name })) && onDelete()}>{t('goals.delete')}</button>
+            <ConfirmButton className="ghost danger" onConfirm={onDelete}>{t('goals.delete')}</ConfirmButton>
           </div>
         </div>
       )}

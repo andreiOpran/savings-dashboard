@@ -3,7 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { goalsRemaining, history, receivablesTotal } from './calc';
 import { money, monthLabel, signedMoney } from './format';
 import { LANGUAGES, type Lang } from './i18n';
-import { downloadJson, emptyData, fetchEurRon, readJsonFile, useAppData } from './storage';
+import { downloadJson, emptyData, fetchEurRon, readJsonFile, useAppData, type SyncState } from './storage';
+import { num } from './expr';
+import { inClaude } from './runtime';
+import { ExprInput } from './components/ExprInput';
 import type { AppData } from './types';
 import { HistoryChart } from './components/HistoryChart';
 import { AddMonth, HistoryTable } from './components/History';
@@ -15,26 +18,39 @@ const RATE_TTL_MS = 12 * 60 * 60 * 1000;
 
 export default function App() {
   const { t } = useTranslation();
-  const { data, setData, update } = useAppData();
+  const { data, setData, update, sync } = useAppData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  /** A backup waiting for "Replace" (the claude.ai viewer shows no confirm dialogs). */
+  const [pending, setPending] = useState<AppData | null>(null);
 
   const importFile = async (file?: File) => {
     if (!file) return;
+    setNotice(null);
     try {
       const d = await readJsonFile(file);
-      if (data && !confirm(t('backup.replaceConfirm'))) return;
-      setData(d);
       setError(null);
+      if (data) setPending(d); else setData(d);
     } catch {
       setError(t('backup.invalid'));
     }
+  };
+
+  const exportBackup = async () => {
+    if (!data) return;
+    const result = await downloadJson(data);
+    setNotice(result === 'saved' ? t('backup.saved') : result === 'failed' ? t('backup.failed') : null);
   };
 
   const fileInput = (
     <input ref={fileRef} type="file" accept="application/json,.json" hidden
       onChange={(e) => { importFile(e.target.files?.[0]); e.target.value = ''; }} />
   );
+
+  if (!data && sync === 'connecting') {
+    return <main className="onboarding"><p className="muted">{t('app.loading')}</p></main>;
+  }
 
   if (!data) {
     return (
@@ -83,16 +99,36 @@ export default function App() {
           <HistoryTable data={data} update={update} />
         </section>
 
+        {pending && (
+          <div className="replace-bar" role="alertdialog" aria-label={t('backup.replaceConfirm')}>
+            <span>{t('backup.replaceConfirm')}</span>
+            <span className="spacer" />
+            <button className="primary" onClick={() => { setData(pending); setPending(null); }}>{t('backup.replace')}</button>
+            <button onClick={() => setPending(null)}>{t('backup.cancel')}</button>
+          </div>
+        )}
+
         <footer className="footer">
-          <span className="muted">{t('backup.footer')}</span>
+          <SyncStatus sync={sync} />
           <span className="spacer" />
-          <button onClick={() => downloadJson(data)}>{t('backup.export')}</button>
+          <button onClick={exportBackup}>{t('backup.export')}</button>
           <button onClick={() => fileRef.current?.click()}>{t('backup.import')}</button>
+          {notice && <span className="muted" role="status">{notice}</span>}
           {error && <span className="error">{error}</span>}
           {fileInput}
         </footer>
       </main>
     </>
+  );
+}
+
+function SyncStatus({ sync }: { sync: SyncState }) {
+  const { t } = useTranslation();
+  return (
+    <span className={`sync sync-${sync}`} role="status">
+      <span className="sync-dot" aria-hidden />
+      {t(`sync.${sync}`)}
+    </span>
   );
 }
 
@@ -126,9 +162,12 @@ function Header({ data, update }: { data: AppData; update: (fn: (d: AppData) => 
     }
   };
 
+  // The claude.ai page can't reach outside services, so there the rate is typed by hand.
+  const canFetch = !inClaude();
+
   useEffect(() => {
     const last = data.settings.eurRonUpdated ? Date.parse(data.settings.eurRonUpdated) : 0;
-    if (data.settings.autoRate && Date.now() - last > RATE_TTL_MS) refresh();
+    if (canFetch && data.settings.autoRate && Date.now() - last > RATE_TTL_MS) refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -140,10 +179,15 @@ function Header({ data, update }: { data: AppData; update: (fn: (d: AppData) => 
     <header className="topbar">
       <h1>{t('app.title')}</h1>
       <span className="spacer" />
-      <button className={`rate ${rateError ? 'stale' : ''}`} onClick={refresh} disabled={busy}
-        title={rateError ? t('rate.failed') : t('rate.updated', { date: updated })}>
-        <span className="muted">EUR/RON</span> <b>{data.settings.eurRon.toFixed(4)}</b> <span aria-hidden>{busy ? '…' : '↻'}</span>
-      </button>
+      <div className={`rate ${rateError ? 'stale' : ''}`} title={!canFetch ? t('rate.manual', { date: updated }) : rateError ? t('rate.failed') : t('rate.updated', { date: updated })}>
+        <span className="muted">EUR/RON</span>
+        <ExprInput className="rate-input" value={data.settings.eurRon.toFixed(4)} ariaLabel={t('rate.edit')}
+          onChange={(v) => {
+            const eurRon = num(v);
+            if (eurRon > 0) update((d) => ({ ...d, settings: { ...d.settings, eurRon, eurRonUpdated: new Date().toISOString() } }));
+          }} />
+        {canFetch && <button className="icon ghost" onClick={refresh} disabled={busy} aria-label={t('rate.refresh')}>{busy ? '…' : '↻'}</button>}
+      </div>
       <LanguageSwitch />
     </header>
   );

@@ -5,19 +5,26 @@
     "importBackup": "Importă backup (.json)",
     "startEmpty": "Începe de la zero",
     "fromSheet": "Vii din spreadsheet? Rulează <code>scripts/import_xlsx.py</code> pe el ca să obții un fișier de backup.",
-    "language": "Limbă"
+    "language": "Limbă",
+    "loading": "Se încarcă datele…"
   },
   "backup": {
     "export": "Exportă backup",
     "import": "Importă backup",
     "replaceConfirm": "Înlocuiești toate datele actuale cu acest backup?",
     "invalid": "Fișierul nu este un backup Economii.",
-    "footer": "Datele stau doar în acest browser. Exportă un backup regulat."
+    "replace": "Înlocuiește",
+    "cancel": "Anulează",
+    "saved": "Backup salvat.",
+    "failed": "Backup-ul nu a putut fi salvat aici."
   },
   "rate": {
     "updated": "Curs BCE, actualizat {{date}}. Click pentru reîmprospătare.",
     "fromImport": "din import",
-    "failed": "Nu s-a putut actualiza — se folosește ultimul curs cunoscut"
+    "failed": "Nu s-a putut actualiza — se folosește ultimul curs cunoscut",
+    "edit": "Curs EUR/RON",
+    "refresh": "Actualizează cursul",
+    "manual": "Setat manual, ultima modificare {{date}}."
   },
   "kpi": {
     "summary": "Rezumat",
@@ -158,5 +165,15 @@
     "xtbShort": "Liber XTB",
     "onIng": "Pe ING",
     "hint": "Suma de pe ING se scade din totalul din conturi când înregistrezi o lună."
+  },
+  "confirm": {
+    "again": "Apasă din nou pentru confirmare",
+    "short": "Ștergi?"
+  },
+  "sync": {
+    "local": "Salvat doar în acest browser. Exportă un backup regulat.",
+    "connecting": "Se conectează…",
+    "synced": "Sincronizat cu contul tău claude.ai — aceleași date pe toate dispozitivele.",
+    "error": "Contul claude.ai nu poate fi accesat acum. Modificările rămân în acest browser."
   }
 }

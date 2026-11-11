@@ -5,6 +5,7 @@ import { currentMonth, goalsRemaining, history, nextMonth, receivablesTotal, sal
 import { evaluate } from '../expr';
 import { money, monthLabel, signedMoney } from '../format';
 import { ExprInput } from './ExprInput';
+import { ConfirmButton } from './ConfirmButton';
 
 type Update = (fn: (d: AppData) => AppData) => void;
 
@@ -71,7 +72,7 @@ export function AddMonth({ data, update }: { data: AppData; update: Update }) {
       </label>
       <label className="grow">
         <span className="muted">{t('month.accounts')}</span>
-        <input inputMode="decimal" placeholder="e.g. 32119" value={expr} onChange={(e) => setExpr(e.target.value)}
+        <input inputMode="decimal" placeholder="30000+1500" value={expr} onChange={(e) => setExpr(e.target.value)}
           aria-invalid={expr !== '' && accounts === null} />
         <small className="muted preview">{expr && accounts !== null ? `= ${money(accounts)}` : ' '}</small>
       </label>
@@ -138,8 +139,8 @@ export function HistoryTable({ data, update }: { data: AppData; update: Update }
                 </td>
                 <td className={`num hide-md ${r.untilGoals < 0 ? 'neg' : ''}`}
                   title={r.hasGoals ? undefined : t('table.todayGoals')}>{money(r.untilGoals)}</td>
-                <td className="hide-sm"><button className="icon ghost" aria-label={t('table.delete', { month: monthLabel(r.month) })}
-                  onClick={() => confirm(t('table.deleteConfirm', { month: monthLabel(r.month) })) && remove(r.month)}>×</button></td>
+                <td className="hide-sm"><ConfirmButton className="icon ghost" ariaLabel={t('table.delete', { month: monthLabel(r.month) })}
+                  onConfirm={() => remove(r.month)}>×</ConfirmButton></td>
               </tr>
             );
           })}
