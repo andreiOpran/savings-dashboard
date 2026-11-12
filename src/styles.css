@@ -288,7 +288,7 @@ button.armed { color: var(--bad); border-color: var(--bad); background: var(--ba
 .log-fields input { border-color: var(--border); background: var(--surface); padding: 6px 8px; width: 100%; font-variant-numeric: tabular-nums; }
 .log-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
 .exchanges { list-style: none; margin: 8px 0 0; padding: 0; display: grid; }
-.exchange { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 4px 8px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.exchange { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 4px 8px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
 .exchange:last-child { border-bottom: 0; }
 .ex-when { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
 .ex-math { display: inline-flex; align-items: center; gap: 2px; font-variant-numeric: tabular-nums; }
@@ -398,3 +398,20 @@ button, summary, label { -webkit-tap-highlight-color: transparent; }
 
 .hint.note { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
 .hint.moved { color: var(--good); }
+
+/* Salaries + XTB logs */
+.logs { display: grid; gap: 20px; }
+@media (min-width: 1000px) { .logs { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; } }
+.log > .subhead { margin-top: 0; }
+.log .exchanges { margin-top: 8px; }
+.empty-log { padding: 12px 0; }
+.log-fields.four { grid-template-columns: 1.2fr 1fr 1fr 1fr; }
+@media (max-width: 560px) { .log-fields.four { grid-template-columns: 1fr 1fr; } .log-fields.four label:first-child { grid-column: 1 / -1; } }
+.exchange.salary .ex-math { flex-wrap: wrap; row-gap: 4px; }
+.ex-math .sep { margin: 0 4px; }
+.ex-ron small { display: block; font-weight: 400; font-size: 11px; }
+.warn { color: var(--bad); }
+@media (max-width: 420px) {
+  .exchange { grid-template-columns: minmax(0, 1fr) auto; }
+  .exchange > .ex-ron { grid-column: 1 / -1; text-align: right; }
+}

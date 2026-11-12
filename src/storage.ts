@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { AppData, Exchange, SalaryPlan, Snapshot } from './types';
+import type { AppData, Exchange, SalaryEntry, SalaryPlan, Snapshot } from './types';
 import { uid } from './id';
 import { inClaude, use, type DocRef } from './runtime';
 
@@ -11,7 +11,7 @@ export function emptyData(): AppData {
   return {
     version: 1,
     settings: { eurRon: 5.0, autoRate: true },
-    plan: { salaries: 0, savingsPerSalary: '2500', investPerSalaryEur: '200', exchanges: [] },
+    plan: { savingsPerSalary: '2500', investPerSalaryEur: '200', salaries: [], exchanges: [] },
     receivables: [],
     goals: [],
     snapshots: [],
@@ -26,35 +26,69 @@ export function parseData(raw: unknown): AppData {
   return {
     version: 1,
     settings: { ...base.settings, ...d.settings },
-    plan: migratePlan({ ...base.plan, exchanges: undefined, ...d.plan } as unknown as LegacyPlan, d.settings?.eurRon ?? base.settings.eurRon),
+    plan: migratePlan({ ...base.plan, salaries: undefined, exchanges: undefined, ...d.plan } as unknown as LegacyPlan, d.settings?.eurRon ?? base.settings.eurRon),
     receivables: Array.isArray(d.receivables) ? d.receivables : [],
     goals: Array.isArray(d.goals) ? d.goals : [],
     snapshots: Array.isArray(d.snapshots) ? d.snapshots.map(migrateSnapshot) : [],
   };
 }
 
-type LegacyPlan = Omit<SalaryPlan, 'exchanges'> & { exchanges?: Exchange[]; xtbFreeEur?: string; eurRate?: string };
+type LegacyPlan = {
+  savingsPerSalary: string;
+  investPerSalaryEur: string;
+  /** A count in older versions, a list of entries now. */
+  salaries?: number | SalaryEntry[];
+  exchanges?: Exchange[];
+  xtbFreeEur?: string;
+  eurRate?: string;
+};
 
 /**
- * Before the exchange log, the plan held "invested per salary × salaries" and one
- * XTB free-funds sum, all converted at a single rate (the sheet used a fixed 5).
- * Turn that into individual exchanges at that rate, so the ING amount stays the
- * same; their real rates can then be corrected one by one.
+ * Bring any older salary-split format up to date without changing the ING amount:
+ * - v0 (the sheet): a salary count × "saved per salary", "invested per salary" and
+ *   one XTB sum, all at one rate → one exchange per investment and XTB transfer;
+ * - v1: a salary count + dated investment exchanges → one salary entry per month,
+ *   holding that month's savings and investment (with its real rate).
  */
 export function migratePlan(p: LegacyPlan, liveRate: number): SalaryPlan {
-  const { xtbFreeEur, eurRate, ...plan } = p;
-  if (Array.isArray(p.exchanges)) return { ...plan, exchanges: p.exchanges };
-  // Old format: no exchange log yet.
+  const { savingsPerSalary, investPerSalaryEur } = p;
+  if (Array.isArray(p.salaries)) {
+    return { savingsPerSalary, investPerSalaryEur, salaries: p.salaries, exchanges: p.exchanges ?? [] };
+  }
+  const count = p.salaries ?? 0;
+  const exchanges = Array.isArray(p.exchanges) ? p.exchanges : migrateV0Exchanges(p, liveRate);
+  // Oldest first, undated ones (from the sheet) in their original order.
+  const invests = exchanges
+    .map((x, i) => ({ x, i }))
+    .filter(({ x }) => x.kind === 'invest')
+    .sort((a, b) => (a.x.date ?? '').localeCompare(b.x.date ?? '') || a.i - b.i)
+    .map(({ x }) => x);
+  const salaries: SalaryEntry[] = [];
+  for (let i = 0; i < Math.max(count, invests.length); i++) {
+    const inv = invests[i];
+    salaries.push({
+      id: inv?.id ?? uid(),
+      ...(inv?.date ? { month: inv.date.slice(0, 7) } : {}),
+      savedExpr: i < count ? savingsPerSalary || '0' : '0',
+      investEurExpr: inv?.eurExpr ?? '0',
+      rate: inv?.rate ?? liveRate,
+    });
+  }
+  return { savingsPerSalary, investPerSalaryEur, salaries, exchanges: exchanges.filter((x) => x.kind === 'xtb') };
+}
+
+function migrateV0Exchanges(p: LegacyPlan, liveRate: number): Exchange[] {
+  const { xtbFreeEur, eurRate } = p;
   const rate = eurRate?.trim() ? Number(eurRate.replace(',', '.')) || liveRate : liveRate;
   const exchanges: Exchange[] = [];
-  for (let i = 0; i < (p.salaries || 0); i++) {
+  for (let i = 0; i < (typeof p.salaries === 'number' ? p.salaries : 0); i++) {
     exchanges.push({ id: uid(), kind: 'invest', eurExpr: p.investPerSalaryEur || '0', rate });
   }
   // "390+185" was two separate transfers: keep them as two entries.
   const xtb = (xtbFreeEur ?? '').replace(/\s+/g, '');
   const parts = /^\d+(\.\d+)?(\+\d+(\.\d+)?)*$/.test(xtb) ? xtb.split('+') : xtb && xtb !== '0' ? [xtb] : [];
   for (const eurExpr of parts) exchanges.push({ id: uid(), kind: 'xtb', eurExpr, rate });
-  return { ...plan, exchanges };
+  return exchanges;
 }
 
 /** v0.1 stored hidden "frozen" totals; turn them into the editable per-month fields. */

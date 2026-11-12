@@ -1,6 +1,6 @@
 import { num } from './expr';
 import { uid } from './id';
-import type { AppData, Currency, Exchange, Goal, Receivable, Snapshot } from './types';
+import type { AppData, Currency, Exchange, Goal, Receivable, SalaryEntry, Snapshot } from './types';
 
 export const toRon = (amount: number, currency: Currency, eurRon: number) =>
   currency === 'EUR' ? amount * eurRon : amount;
@@ -125,14 +125,26 @@ function exchangeTotals(list: Exchange[]): ExchangeTotals {
   return { count: list.length, eur, ron, avgRate: eur ? ron / eur : 0 };
 }
 
-/** ING = salaries saved − what the euro purchases really cost in lei. */
+/** What one salary leaves on ING: saved − what its investment cost. */
+export const salaryToIng = (s: SalaryEntry) => num(s.savedExpr) - num(s.investEurExpr) * s.rate;
+
+/** ING = everything saved − what the euro purchases really cost in lei. */
 export function salaryPlan(data: AppData) {
   const p = data.plan;
-  const totalSavings = p.salaries * num(p.savingsPerSalary);
-  const invest = exchangeTotals(p.exchanges.filter((x) => x.kind === 'invest'));
+  const totalSavings = p.salaries.reduce((sum, s) => sum + num(s.savedExpr), 0);
+  const invest = exchangeTotals(p.salaries.map((s) => ({ id: s.id, kind: 'invest', eurExpr: s.investEurExpr, rate: s.rate })));
+  invest.count = p.salaries.filter((s) => num(s.investEurExpr) > 0).length;
   const xtb = exchangeTotals(p.exchanges.filter((x) => x.kind === 'xtb'));
   const ing = totalSavings - invest.ron - xtb.ron;
-  return { totalSavings, invest, xtb, ing };
+  return { totalSavings, salaryCount: p.salaries.length, invest, xtb, ing };
+}
+
+/** Newest month first; undated (imported) entries last, in their original order. */
+export function sortedSalaries(list: SalaryEntry[]): SalaryEntry[] {
+  return list
+    .map((x, i) => ({ x, i }))
+    .sort((a, b) => (b.x.month ?? '').localeCompare(a.x.month ?? '') || a.i - b.i)
+    .map(({ x }) => x);
 }
 
 /** Newest first; undated (imported) entries last, in their original order. */

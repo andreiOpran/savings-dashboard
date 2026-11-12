@@ -153,21 +153,19 @@
   },
   "plan": {
     "title": "Împărțirea salariului",
-    "subtitle": "Cum se împart salariile economisite între conturi",
-    "salaries": "Salarii economisite",
-    "less": "Unul mai puțin",
-    "more": "Unul în plus",
+    "subtitle": "Unde au ajuns salariile economisite",
     "perSalary": "Economisit per salariu",
-    "investPerSalary": "Investiție lunară (implicit)",
+    "investPerSalary": "Investit per salariu",
     "totalSaved": "Total economisit",
     "inStocks": "În acțiuni",
     "xtbShort": "Liber XTB",
     "onIng": "Pe ING",
-    "hint": "Pe ING = total economisit − cât au costat de fapt euro, fiecare schimb la cursul lui. Se scade din totalul din conturi când înregistrezi o lună.",
+    "hint": "Pe ING = total economisit − cât au costat de fapt euro, fiecare la cursul lui. Se scade din totalul din conturi când înregistrezi o lună.",
     "costAt": "{{ron}} · curs mediu {{rate}}",
-    "mismatch_one": "{{salaries}} salarii economisite, dar {{count}} investiție lunară înregistrată.",
-    "mismatch_few": "{{salaries}} salarii economisite, dar {{count}} investiții lunare înregistrate.",
-    "mismatch_other": "{{salaries}} salarii economisite, dar {{count}} de investiții lunare înregistrate."
+    "defaults": "Valori implicite pentru un salariu nou",
+    "salaryCount_one": "{{count}} salariu",
+    "salaryCount_few": "{{count}} salarii",
+    "salaryCount_other": "{{count}} de salarii"
   },
   "confirm": {
     "again": "Apasă din nou pentru confirmare",
@@ -180,12 +178,6 @@
     "error": "Contul claude.ai nu poate fi accesat acum. Modificările rămân în acest browser."
   },
   "exchange": {
-    "title": "Schimburi valutare",
-    "kind": "Tip schimb",
-    "invest": "Investiție lunară",
-    "xtb": "Fonduri libere XTB",
-    "investShort": "Investiție",
-    "xtbShort": "XTB",
     "date": "Data",
     "eur": "Euro",
     "rate": "Curs (lei per €)",
@@ -197,8 +189,8 @@
     "older_few": "{{count}} schimburi mai vechi",
     "older_other": "{{count}} de schimburi mai vechi",
     "delete": "Șterge schimbul",
-    "subtitle": "Fiecare cumpărare de euro, la cursul primit de fapt",
-    "empty": "Niciun schimb înregistrat încă."
+    "empty": "Niciun schimb înregistrat încă.",
+    "xtbTitle": "Fonduri libere XTB"
   },
   "tabs": {
     "label": "Secțiuni",
@@ -207,5 +199,25 @@
     "receivables": "De primit",
     "plan": "Salariu",
     "months": "Luni"
+  },
+  "salaries": {
+    "title": "Salarii și schimburi",
+    "subtitle": "Cât ai economisit și investit în fiecare lună, și banii mutați pe XTB",
+    "logTitle": "Salarii",
+    "month": "Luna",
+    "saved": "Economisit (lei)",
+    "invested": "Investit (€)",
+    "preview": "Investiția costă {{cost}} · {{ing}} rămân pe ING",
+    "exists": "{{month}} are deja un salariu; acesta se adaugă separat.",
+    "add": "Adaugă salariul",
+    "empty": "Niciun salariu înregistrat încă.",
+    "older_one": "{{count}} salariu mai vechi",
+    "older_few": "{{count}} salarii mai vechi",
+    "older_other": "{{count}} de salarii mai vechi",
+    "costShort": "investit: {{cost}}",
+    "toIng": "→ ING {{ing}}",
+    "toIngHint": "Economisit minus cât a costat investiția din luna asta",
+    "importedHint": "Importat din spreadsheet: luna nu se știe.",
+    "delete": "Șterge salariul"
   }
 }

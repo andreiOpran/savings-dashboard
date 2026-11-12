@@ -62,32 +62,46 @@ describe('calc', () => {
     expect(d.snapshots[0]).toEqual({ month: '2026-03', expr: '1', receivablesExpr: '5290', goals: 28653.18 });
   });
 
-  it('migrates the sheet\'s salary split into exchanges, keeping the ING amount', () => {
+  it('migrates the sheet\'s salary split into monthly salaries, keeping the ING amount', () => {
     const d = parseData({ ...emptyData(), plan: { salaries: 5, savingsPerSalary: '2500', investPerSalaryEur: '200', xtbFreeEur: '390+185', eurRate: '5' } });
     expect(d.plan).not.toHaveProperty('xtbFreeEur');
-    expect(d.plan.exchanges.map((x) => [x.kind, x.eurExpr, x.rate])).toEqual([
-      ['invest', '200', 5], ['invest', '200', 5], ['invest', '200', 5], ['invest', '200', 5], ['invest', '200', 5],
-      ['xtb', '390', 5], ['xtb', '185', 5],
-    ]);
+    expect(d.plan.salaries.map((x) => [x.month, x.savedExpr, x.investEurExpr, x.rate])).toEqual(
+      Array(5).fill([undefined, '2500', '200', 5]));
+    expect(d.plan.exchanges.map((x) => [x.kind, x.eurExpr, x.rate])).toEqual([['xtb', '390', 5], ['xtb', '185', 5]]);
     expect(salaryPlan(d).ing).toBe(4625);
-    expect(parseData(JSON.parse(JSON.stringify(d))).plan.exchanges).toEqual(d.plan.exchanges); // idempotent
+    expect(parseData(JSON.parse(JSON.stringify(d))).plan).toEqual(d.plan); // idempotent
   });
 
-  it('converts each exchange at its own rate', () => {
+  it('migrates dated investment exchanges (v1) into one salary per month', () => {
+    const inv = (date: string, rate: number) => ({ id: date, date, kind: 'invest', eurExpr: '200', rate });
+    const d = parseData({ ...emptyData(), plan: {
+      salaries: 5, savingsPerSalary: '2500', investPerSalaryEur: '200',
+      exchanges: [inv('2026-11-05', 5.11), inv('2026-07-05', 5.07), inv('2026-09-05', 5.09), inv('2026-08-05', 5.08), inv('2026-10-05', 5.1),
+        { id: 'x1', kind: 'xtb', eurExpr: '390', rate: 5 }, { id: 'x2', kind: 'xtb', eurExpr: '185', rate: 5 }],
+    } });
+    expect(d.plan.salaries.map((x) => [x.month, x.rate])).toEqual([
+      ['2026-07', 5.07], ['2026-08', 5.08], ['2026-09', 5.09], ['2026-10', 5.1], ['2026-11', 5.11]]);
+    expect(d.plan.exchanges).toHaveLength(2);
+    expect(salaryPlan(d).ing).toBeCloseTo(12500 - 5090 - 2875);
+  });
+
+  it('lets every month save and invest a different amount', () => {
     const d = emptyData();
     d.plan = {
-      salaries: 2, savingsPerSalary: '2500', investPerSalaryEur: '200', exchanges: [
-        { id: 'a', date: '2026-10-05', kind: 'invest', eurExpr: '200', rate: 4.97 },
-        { id: 'b', date: '2026-11-05', kind: 'invest', eurExpr: '200', rate: 5.09 },
-        { id: 'c', date: '2026-11-12', kind: 'xtb', eurExpr: '100+50', rate: 5.1 },
+      savingsPerSalary: '2500', investPerSalaryEur: '200', salaries: [
+        { id: 'a', month: '2026-10', savedExpr: '2500', investEurExpr: '200', rate: 4.97 },
+        { id: 'b', month: '2026-11', savedExpr: '3000+200', investEurExpr: '300', rate: 5.09 },
+        { id: 'c', month: '2026-12', savedExpr: '1800', investEurExpr: '0', rate: 5.1 },
       ],
+      exchanges: [{ id: 'x', date: '2026-11-12', kind: 'xtb', eurExpr: '100+50', rate: 5.1 }],
     };
     const s = salaryPlan(d);
-    expect(s.invest.eur).toBe(400);
-    expect(s.invest.ron).toBeCloseTo(994 + 1018);
-    expect(s.invest.avgRate).toBeCloseTo(5.03);
+    expect(s.totalSavings).toBe(7500);
+    expect(s.invest.eur).toBe(500);
+    expect(s.invest.ron).toBeCloseTo(994 + 1527);
+    expect(s.invest.count).toBe(2);
     expect(s.xtb.ron).toBeCloseTo(765);
-    expect(s.ing).toBeCloseTo(5000 - 2012 - 765);
+    expect(s.ing).toBeCloseTo(7500 - 2521 - 765);
   });
 });
 

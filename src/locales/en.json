@@ -147,20 +147,18 @@
   },
   "plan": {
     "title": "Salary split",
-    "subtitle": "How saved salaries are spread across accounts",
-    "salaries": "Salaries saved",
-    "less": "One less",
-    "more": "One more",
+    "subtitle": "Where your saved salaries went",
     "perSalary": "Saved per salary",
-    "investPerSalary": "Monthly investment (default)",
+    "investPerSalary": "Invested per salary",
     "totalSaved": "Total saved",
     "inStocks": "In stocks",
     "xtbShort": "XTB free",
     "onIng": "On ING",
-    "hint": "On ING = total saved − what the euros really cost, each exchange at its own rate. It's subtracted from your accounts total when you record a month.",
+    "hint": "On ING = total saved − what the euros really cost, each at its own rate. It's subtracted from your accounts total when you record a month.",
     "costAt": "{{ron}} · avg. {{rate}}",
-    "mismatch_one": "{{salaries}} salaries saved, but {{count}} monthly investment logged.",
-    "mismatch_other": "{{salaries}} salaries saved, but {{count}} monthly investments logged."
+    "defaults": "Defaults for a new salary",
+    "salaryCount_one": "{{count}} salary",
+    "salaryCount_other": "{{count}} salaries"
   },
   "confirm": {
     "again": "Click again to confirm",
@@ -173,12 +171,6 @@
     "error": "Can't reach your claude.ai account right now. Changes are kept in this browser."
   },
   "exchange": {
-    "title": "Exchanges",
-    "kind": "Exchange type",
-    "invest": "Monthly investment",
-    "xtb": "XTB free funds",
-    "investShort": "Investment",
-    "xtbShort": "XTB",
     "date": "Date",
     "eur": "Euros",
     "rate": "Rate (lei per €)",
@@ -189,8 +181,8 @@
     "older_one": "{{count}} older exchange",
     "older_other": "{{count}} older exchanges",
     "delete": "Delete exchange",
-    "subtitle": "Every euro purchase, at the rate you actually got",
-    "empty": "No exchanges logged yet."
+    "empty": "No exchanges logged yet.",
+    "xtbTitle": "XTB free funds"
   },
   "tabs": {
     "label": "Sections",
@@ -199,5 +191,24 @@
     "receivables": "De primit",
     "plan": "Salary",
     "months": "Months"
+  },
+  "salaries": {
+    "title": "Salaries and exchanges",
+    "subtitle": "What you saved and invested each month, and money moved to XTB",
+    "logTitle": "Salaries",
+    "month": "Month",
+    "saved": "Saved (lei)",
+    "invested": "Invested (€)",
+    "preview": "Investment costs {{cost}} · {{ing}} stays on ING",
+    "exists": "{{month}} already has a salary; this adds another one.",
+    "add": "Add salary",
+    "empty": "No salaries logged yet.",
+    "older_one": "{{count}} older salary",
+    "older_other": "{{count}} older salaries",
+    "costShort": "invested: {{cost}}",
+    "toIng": "→ ING {{ing}}",
+    "toIngHint": "Saved minus what this month's investment cost",
+    "importedHint": "Imported from the spreadsheet: the month isn't known.",
+    "delete": "Delete salary"
   }
 }

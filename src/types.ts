@@ -69,12 +69,27 @@ export interface Exchange {
   note?: string;
 }
 
+/** One saved salary: what was put aside that month and what was invested from it. */
+export interface SalaryEntry {
+  id: string;
+  /** YYYY-MM; absent for entries imported from the sheet whose month isn't known. */
+  month?: string;
+  /** Lei saved from this salary (expression). */
+  savedExpr: string;
+  /** Euros invested from it (expression); "0" when nothing was invested. */
+  investEurExpr: string;
+  /** RON per EUR paid for that investment. */
+  rate: number;
+}
+
 /** The "Numar salariu" block: saved salaries, and the euros bought out of them. */
 export interface SalaryPlan {
-  salaries: number;
+  /** Default lei saved when adding a salary. */
   savingsPerSalary: string;
-  /** Default euro amount when logging the monthly investment. */
+  /** Default euros invested when adding a salary. */
   investPerSalaryEur: string;
+  salaries: SalaryEntry[];
+  /** Free funds moved to XTB (kind "xtb"). */
   exchanges: Exchange[];
 }
 
