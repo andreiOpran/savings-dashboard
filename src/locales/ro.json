@@ -62,8 +62,8 @@
     "month": "Luna",
     "accounts": "Total în conturi",
     "ing": "− Economii ING",
-    "fromPlan": "din împărțirea salariului",
-    "resetPlan": "resetează la împărțirea salariului",
+    "fromPlan": "automat",
+    "resetPlan": "resetează la automat",
     "receivables": "De primit",
     "fromList": "din listă",
     "resetList": "resetează la listă",
@@ -193,5 +193,13 @@
     "older_few": "{{count}} schimburi mai vechi",
     "older_other": "{{count}} de schimburi mai vechi",
     "delete": "Șterge schimbul"
+  },
+  "tabs": {
+    "label": "Secțiuni",
+    "overview": "Rezumat",
+    "goals": "Goals",
+    "receivables": "De primit",
+    "plan": "Salariu",
+    "months": "Luni"
   }
 }

@@ -100,14 +100,14 @@ export function HistoryTable({ data, update }: { data: AppData; update: Update }
         <thead>
           <tr>
             <th>{t('table.month')}</th>
-            <th className="num hide-sm">{t('table.accounts')}</th>
-            <th className="num hide-sm">{t('table.ing')}</th>
+            <th className="num">{t('table.accounts')}</th>
+            <th className="num">{t('table.ing')}</th>
             <th className="num">{t('table.balance')}</th>
             <th className="num">{t('table.receivables')}</th>
             <th className="num">{t('table.realTotal')}</th>
             <th className="num hide-md">{t('table.change')}</th>
             <th className="num hide-md">{t('table.free')}</th>
-            <th className="hide-sm" aria-label={t('table.actions')} />
+            <th aria-label={t('table.actions')} />
           </tr>
         </thead>
         <tbody>
@@ -116,30 +116,30 @@ export function HistoryTable({ data, update }: { data: AppData; update: Update }
             const delta = prev ? r.withReceivables - prev.withReceivables : null;
             return (
               <tr key={r.month}>
-                <td><span className="hide-sm">{monthLabel(r.month)}</span><span className="show-sm">{monthLabel(r.month, false)} ’{r.month.slice(2, 4)}</span></td>
-                <td className="num hide-sm">
+                <td className="month">{monthLabel(r.month)}</td>
+                <td className="num" data-label={t('table.accounts')}>
                   <ExprInput className="amount" value={r.snapshot.expr} ariaLabel={t('table.accountsFor', { month: r.month })}
                     onChange={(e) => patch(r.month, { expr: e })} />
                 </td>
-                <td className="num hide-sm">
+                <td className="num" data-label={t('table.ing')}>
                   <ExprInput className="amount" value={r.snapshot.ingExpr ?? ''} placeholder="—"
                     ariaLabel={t('table.ingFor', { month: r.month })}
                     onChange={(e) => patch(r.month, { ingExpr: e === '' ? undefined : e })} />
                 </td>
-                <td className="num">{money(r.balance).replace(' lei', '')}</td>
-                <td className={`num ${r.hasReceivables ? '' : 'unrecorded'}`}>
+                <td className="num" data-label={t('table.balance')}>{money(r.balance)}</td>
+                <td className={`num ${r.hasReceivables ? '' : 'unrecorded'}`} data-label={t('table.receivables')}>
                   <ExprInput className="amount" value={r.snapshot.receivablesExpr ?? ''} placeholder={round2(today)}
                     ariaLabel={t('table.receivablesFor', { month: r.month })}
                     onChange={(e) => patch(r.month, { receivablesExpr: e === '' ? undefined : e })} />
                   {!r.hasReceivables && <span className="dotmark" title={t('table.unrecorded')}>*</span>}
                 </td>
-                <td className="num strong">{money(r.withReceivables).replace(' lei', '')}<span className="unit hide-sm"> lei</span></td>
-                <td className={`num delta hide-md ${delta === null ? '' : delta >= 0 ? 'up' : 'down'}`}>
+                <td className="num strong" data-label={t('table.realTotal')}>{money(r.withReceivables)}</td>
+                <td className={`num delta hide-md ${delta === null ? '' : delta >= 0 ? 'up' : 'down'}`} data-label={t('table.change')}>
                   {delta === null ? '—' : <>{delta >= 0 ? '▲' : '▼'} {signedMoney(delta)}</>}
                 </td>
-                <td className={`num hide-md ${r.untilGoals < 0 ? 'neg' : ''}`}
+                <td className={`num hide-md ${r.untilGoals < 0 ? 'neg' : ''}`} data-label={t('table.free')}
                   title={r.hasGoals ? undefined : t('table.todayGoals')}>{money(r.untilGoals)}</td>
-                <td className="hide-sm"><ConfirmButton className="icon ghost" ariaLabel={t('table.delete', { month: monthLabel(r.month) })}
+                <td className="actions"><ConfirmButton className="icon ghost" ariaLabel={t('table.delete', { month: monthLabel(r.month) })}
                   onConfirm={() => remove(r.month)}>×</ConfirmButton></td>
               </tr>
             );

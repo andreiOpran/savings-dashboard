@@ -16,12 +16,37 @@ import { SalaryPlan } from './components/SalaryPlan';
 
 const RATE_TTL_MS = 12 * 60 * 60 * 1000;
 
+/** On phones the page shows one section at a time, picked from a bottom tab bar. */
+const TABS = ['overview', 'goals', 'receivables', 'plan', 'months'] as const;
+type Tab = (typeof TABS)[number];
+const TAB_KEY = 'economii:tab';
+const TAB_ICONS: Record<Tab, string> = {
+  overview: 'M4 19V5M4 19h16M8 15l3-4 3 2 4-6',
+  goals: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-5a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-4h.01',
+  receivables: 'M12 4v12m0 0-5-5m5 5 5-5M5 20h14',
+  plan: 'M4 7h16v12H4zM4 11h16M15 15h2',
+  months: 'M5 5h14v15H5zM5 10h14M9 3v4M15 3v4',
+};
+function initialTab(): Tab {
+  try {
+    const saved = localStorage.getItem(TAB_KEY) as Tab | null;
+    if (saved && TABS.includes(saved)) return saved;
+  } catch { /* storage unavailable */ }
+  return 'overview';
+}
+
 export default function App() {
   const { t } = useTranslation();
   const { data, setData, update, sync } = useAppData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>(initialTab);
+  const selectTab = (id: Tab) => {
+    setTab(id);
+    try { localStorage.setItem(TAB_KEY, id); } catch { /* storage unavailable */ }
+    window.scrollTo(0, 0);
+  };
   /** A backup waiting for "Replace" (the claude.ai viewer shows no confirm dialogs). */
   const [pending, setPending] = useState<AppData | null>(null);
 
@@ -72,10 +97,10 @@ export default function App() {
   return (
     <>
       <Header data={data} update={update} />
-      <main className="page">
-        <Kpis data={data} />
+      <main className="page" data-tab={tab}>
+        <div data-section="overview"><Kpis data={data} /></div>
 
-        <section className="card">
+        <section className="card" data-section="overview">
           <header className="card-head">
             <div>
               <h2>{t('history.title')}</h2>
@@ -87,14 +112,14 @@ export default function App() {
         </section>
 
         <div className="cols">
-          <Goals data={data} update={update} />
+          <div data-section="goals"><Goals data={data} update={update} /></div>
           <div className="stack">
-            <Receivables data={data} update={update} />
-            <SalaryPlan data={data} update={update} />
+            <div data-section="receivables"><Receivables data={data} update={update} /></div>
+            <div data-section="plan"><SalaryPlan data={data} update={update} /></div>
           </div>
         </div>
 
-        <section className="card">
+        <section className="card" data-section="months">
           <header className="card-head"><div><h2>{t('history.months')}</h2></div></header>
           <HistoryTable data={data} update={update} />
         </section>
@@ -118,6 +143,14 @@ export default function App() {
           {fileInput}
         </footer>
       </main>
+      <nav className="tabbar" aria-label={t('tabs.label')}>
+        {TABS.map((id) => (
+          <button key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => selectTab(id)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={TAB_ICONS[id]} /></svg>
+            <span>{t(`tabs.${id}`)}</span>
+          </button>
+        ))}
+      </nav>
     </>
   );
 }

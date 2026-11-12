@@ -59,8 +59,8 @@
     "month": "Month",
     "accounts": "Total in accounts",
     "ing": "− ING savings",
-    "fromPlan": "from salary split",
-    "resetPlan": "reset to salary split",
+    "fromPlan": "auto",
+    "resetPlan": "reset to auto",
     "receivables": "De primit",
     "fromList": "from your list",
     "resetList": "reset to list",
@@ -185,5 +185,13 @@
     "older_one": "{{count}} older exchange",
     "older_other": "{{count}} older exchanges",
     "delete": "Delete exchange"
+  },
+  "tabs": {
+    "label": "Sections",
+    "overview": "Overview",
+    "goals": "Goals",
+    "receivables": "De primit",
+    "plan": "Salary",
+    "months": "Months"
   }
 }

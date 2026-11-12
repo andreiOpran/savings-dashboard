@@ -40,6 +40,7 @@ export function ExprInput({ value, onChange, ariaLabel, placeholder, className }
     <span className={`expr ${formula && !focused ? 'has-formula' : ''} ${className ?? ''}`} title={formula ? `= ${draft}` : undefined}>
       <input
         inputMode="decimal"
+        style={{ width: `calc(${Math.min(Math.max((shown || placeholder || '').length, 3), 16)}ch + 20px)` }}
         aria-label={ariaLabel}
         aria-invalid={invalid}
         placeholder={placeholder}
@@ -57,20 +58,25 @@ export function ExprInput({ value, onChange, ariaLabel, placeholder, className }
   );
 }
 
-/** Plain text field that commits on blur. */
+/**
+ * Label field that commits on blur. Long text wraps onto more lines instead of
+ * being cut off (a textarea stacked on an invisible copy of its own text).
+ */
 export function TextInput({ value, onChange, ariaLabel, className }: {
   value: string; onChange: (v: string) => void; ariaLabel: string; className?: string;
 }) {
   const [draft, setDraft] = useState(value);
   useEffect(() => setDraft(value), [value]);
   return (
-    <input
-      className={className}
-      aria-label={ariaLabel}
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => draft.trim() && draft !== value ? onChange(draft.trim()) : setDraft(value)}
-      onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-    />
+    <span className={`autogrow ${className ?? ''}`} data-value={draft}>
+      <textarea
+        rows={1}
+        aria-label={ariaLabel}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value.replace(/\n/g, ' '))}
+        onBlur={() => (draft.trim() && draft !== value ? onChange(draft.trim()) : setDraft(value))}
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); } }}
+      />
+    </span>
   );
 }
