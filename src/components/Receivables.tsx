@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import type { AppData, Receivable } from '../types';
 import { num } from '../expr';
-import { money, uid } from '../format';
-import { receivablesTotal } from '../calc';
+import { money, monthLabel, uid } from '../format';
+import { currentMonth, receivablesTotal, setReceived, toRon } from '../calc';
+import { useState } from 'react';
 import { ExprInput, TextInput } from './ExprInput';
 
 type Update = (fn: (d: AppData) => AppData) => void;
@@ -17,13 +18,24 @@ export function Receivables({ data, update }: { data: AppData; update: Update })
     receivables: [...d.receivables, { id: uid(), label: t('receivables.newLabel'), expr: '0', currency: 'RON', received: false }],
   }));
 
+  const [moved, setMoved] = useState<string | null>(null);
+  const toggle = (r: Receivable, received: boolean) => {
+    const month = currentMonth();
+    const recorded = data.snapshots.some((s) => s.month === month);
+    const amount = toRon(num(r.expr), r.currency, data.settings.eurRon);
+    update((d) => setReceived(d, r.id, received, month));
+    setMoved(!received || amount === 0 ? null : recorded
+      ? t('receivables.moved', { amount: money(amount), month: monthLabel(month) })
+      : t('receivables.notMoved', { month: monthLabel(month) }));
+  };
+
   const open = data.receivables.filter((r) => !r.received && num(r.expr) !== 0);
   const idle = data.receivables.filter((r) => r.received || num(r.expr) === 0);
 
   const row = (r: Receivable) => (
     <li key={r.id} className={`row ${r.received ? 'is-done' : ''} ${num(r.expr) === 0 ? 'is-zero' : ''}`}>
       <label className="check" title={r.received ? t('receivables.markNotReceived') : t('receivables.markReceived')}>
-        <input type="checkbox" checked={r.received} onChange={(e) => set(r.id, { received: e.target.checked })} />
+        <input type="checkbox" checked={r.received} onChange={(e) => toggle(r, e.target.checked)} />
       </label>
       <TextInput className="grow" value={r.label} ariaLabel={t('receivables.who')} onChange={(label) => set(r.id, { label })} />
       <ExprInput className="amount" value={r.expr} ariaLabel={t('receivables.amountFor', { label: r.label })} onChange={(expr) => set(r.id, { expr })} />
@@ -48,6 +60,7 @@ export function Receivables({ data, update }: { data: AppData; update: Update })
           <ul className="rows">{idle.map(row)}</ul>
         </details>
       )}
+      {moved && <p className="hint moved" role="status">{moved}</p>}
       <button className="add" onClick={add}>{t('receivables.add')}</button>
     </section>
   );

@@ -105,7 +105,9 @@
     "idle_few": "{{count}} primite sau goale",
     "idle_other": "{{count}} de primite sau goale",
     "add": "+ Adaugă",
-    "newLabel": "Nou"
+    "newLabel": "Nou",
+    "moved": "+{{amount}} adăugați la „În conturi” pentru {{month}} și scăzuți din de primit. Debifează ca să anulezi.",
+    "notMoved": "{{month}} nu e înregistrată încă: banii vor apărea când înregistrezi luna cu totalul din conturi."
   },
   "currency": {
     "switch": "Schimbă moneda",

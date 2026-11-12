@@ -1,6 +1,6 @@
 import { num } from './expr';
 import { uid } from './id';
-import type { AppData, Currency, Exchange, Goal, Snapshot } from './types';
+import type { AppData, Currency, Exchange, Goal, Receivable, Snapshot } from './types';
 
 export const toRon = (amount: number, currency: Currency, eurRon: number) =>
   currency === 'EUR' ? amount * eurRon : amount;
@@ -147,6 +147,60 @@ export function nextMonth(month: string): string {
   const [y, m] = month.split('-').map(Number);
   const d = new Date(Date.UTC(y, m, 1));
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+const fmtAmount = (v: number) => String(Math.round(v * 100) / 100);
+
+/** Append "+x"/"-x" to an expression, or drop that exact suffix if it is already the last term. */
+function adjustExpr(expr: string, delta: number): string {
+  const amount = fmtAmount(Math.abs(delta));
+  const undo = `${delta < 0 ? '+' : '-'}${amount}`;
+  if (expr.endsWith(undo) && expr.length > undo.length) return expr.slice(0, -undo.length);
+  return `${expr || '0'}${delta < 0 ? '-' : '+'}${amount}`;
+}
+
+/**
+ * Tick or untick a receivable. Money that arrives moves from de primit into
+ * the accounts: when the current month is recorded, its "In accounts" grows by
+ * the amount and its recorded de primit shrinks by it, so the real total stays
+ * the same. Unticking reverses exactly what was moved.
+ */
+export function setReceived(data: AppData, id: string, received: boolean, month = currentMonth()): AppData {
+  const r = data.receivables.find((x) => x.id === id);
+  if (!r || r.received === received) return data;
+  let snapshots = data.snapshots;
+  let movedTo: Receivable['movedTo'];
+
+  if (received) {
+    const amount = toRon(num(r.expr), r.currency, data.settings.eurRon);
+    const snap = snapshots.find((s) => s.month === month);
+    if (snap && amount !== 0) {
+      movedTo = { month, amount };
+      snapshots = snapshots.map((s) => s !== snap ? s : {
+        ...s,
+        expr: adjustExpr(s.expr, amount),
+        // An unrecorded de primit already follows the live list, which drops this item by itself.
+        ...(s.receivablesExpr != null && s.receivablesExpr !== '' ? { receivablesExpr: adjustExpr(s.receivablesExpr, -amount) } : {}),
+      });
+    }
+  } else if (r.movedTo) {
+    const { month: m, amount } = r.movedTo;
+    snapshots = snapshots.map((s) => s.month !== m ? s : {
+      ...s,
+      expr: adjustExpr(s.expr, -amount),
+      ...(s.receivablesExpr != null && s.receivablesExpr !== '' ? { receivablesExpr: adjustExpr(s.receivablesExpr, amount) } : {}),
+    });
+  }
+
+  return {
+    ...data,
+    snapshots,
+    receivables: data.receivables.map((x) => {
+      if (x.id !== id) return x;
+      const { movedTo: _old, ...rest } = x;
+      return movedTo ? { ...rest, received, movedTo } : { ...rest, received };
+    }),
+  };
 }
 
 export function currentMonth(): string {

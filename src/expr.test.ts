@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluate } from './expr';
-import { goalStats, history, salaryPlan } from './calc';
+import { goalStats, history, salaryPlan, setReceived } from './calc';
 import { emptyData, parseData } from './storage';
 
 describe('evaluate', () => {
@@ -88,5 +88,61 @@ describe('calc', () => {
     expect(s.invest.avgRate).toBeCloseTo(5.03);
     expect(s.xtb.ron).toBeCloseTo(765);
     expect(s.ing).toBeCloseTo(5000 - 2012 - 765);
+  });
+});
+
+describe('receiving money', () => {
+  const base = () => {
+    const d = emptyData();
+    d.settings.eurRon = 5;
+    d.receivables = [
+      { id: 'p', label: 'Petrescu', expr: '2600+150', currency: 'RON', received: false },
+      { id: 'e', label: 'Euro', expr: '100', currency: 'EUR', received: false },
+    ];
+    d.snapshots = [{ month: '2026-11', expr: '32119', ingExpr: '4625', receivablesExpr: '3250', goals: 0 }];
+    return d;
+  };
+
+  it('moves the amount into the current month, keeping the real total', () => {
+    const before = history(base())[0];
+    const d = setReceived(base(), 'p', true, '2026-11');
+    expect(d.snapshots[0].expr).toBe('32119+2750');
+    expect(d.snapshots[0].receivablesExpr).toBe('3250-2750');
+    expect(d.receivables[0]).toMatchObject({ received: true, movedTo: { month: '2026-11', amount: 2750 } });
+    const after = history(d)[0];
+    expect(after.balance).toBe(before.balance + 2750);
+    expect(after.withReceivables).toBe(before.withReceivables);
+  });
+
+  it('converts euros at the current rate', () => {
+    const d = setReceived(base(), 'e', true, '2026-11');
+    expect(d.snapshots[0].expr).toBe('32119+500');
+  });
+
+  it('unticking undoes it exactly', () => {
+    const d = setReceived(setReceived(base(), 'p', true, '2026-11'), 'p', false, '2026-11');
+    expect(d.snapshots[0]).toEqual(base().snapshots[0]);
+    expect(d.receivables[0]).toEqual(base().receivables[0]);
+  });
+
+  it('unticking after the month was edited subtracts instead', () => {
+    let d = setReceived(base(), 'p', true, '2026-11');
+    d = { ...d, snapshots: [{ ...d.snapshots[0], expr: '35000' }] };
+    d = setReceived(d, 'p', false, '2026-12');
+    expect(d.snapshots[0].expr).toBe('35000-2750');
+  });
+
+  it('only flags it when the current month is not recorded', () => {
+    const d = setReceived(base(), 'p', true, '2026-12');
+    expect(d.snapshots).toEqual(base().snapshots);
+    expect(d.receivables[0].received).toBe(true);
+    expect(d.receivables[0].movedTo).toBeUndefined();
+  });
+
+  it('leaves an unrecorded de primit alone (it follows the list)', () => {
+    const b = base(); delete b.snapshots[0].receivablesExpr;
+    const d = setReceived(b, 'p', true, '2026-11');
+    expect(d.snapshots[0].receivablesExpr).toBeUndefined();
+    expect(d.snapshots[0].expr).toBe('32119+2750');
   });
 });

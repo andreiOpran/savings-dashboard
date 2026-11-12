@@ -26,6 +26,11 @@ export interface Receivable {
   expr: string;
   currency: Currency;
   received: boolean;
+  /**
+   * Set while received: the month whose "In accounts" got this money and
+   * whose de primit was reduced by it, and the lei amount moved.
+   */
+  movedTo?: { month: string; amount: number };
 }
 
 /** What you had at the end of a month. */

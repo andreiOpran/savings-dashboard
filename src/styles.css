@@ -395,3 +395,5 @@ button.armed { color: var(--bad); border-color: var(--bad); background: var(--ba
 }
 button, summary, label { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 480px) { .rate { padding-left: 4px; } .topbar { gap: 8px; } }
+
+.hint.moved { color: var(--good); }

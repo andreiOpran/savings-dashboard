@@ -101,7 +101,9 @@
     "idle_one": "{{count}} received or empty",
     "idle_other": "{{count}} received or empty",
     "add": "+ Add",
-    "newLabel": "New"
+    "newLabel": "New",
+    "moved": "+{{amount}} added to “In accounts” for {{month}} and taken off its de primit. Untick to undo.",
+    "notMoved": "{{month}} isn't recorded yet: the money will show once you record the month with your account totals."
   },
   "currency": {
     "switch": "Switch currency",
