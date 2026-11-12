@@ -192,7 +192,9 @@
     "older_one": "{{count}} schimb mai vechi",
     "older_few": "{{count}} schimburi mai vechi",
     "older_other": "{{count}} de schimburi mai vechi",
-    "delete": "Șterge schimbul"
+    "delete": "Șterge schimbul",
+    "subtitle": "Fiecare cumpărare de euro, la cursul primit de fapt",
+    "empty": "Niciun schimb înregistrat încă."
   },
   "tabs": {
     "label": "Secțiuni",

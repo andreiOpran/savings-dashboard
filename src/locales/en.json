@@ -184,7 +184,9 @@
     "importedHint": "Imported from the spreadsheet: the date and real rate aren't known (the sheet used 5). Edit the rate if you know it.",
     "older_one": "{{count}} older exchange",
     "older_other": "{{count}} older exchanges",
-    "delete": "Delete exchange"
+    "delete": "Delete exchange",
+    "subtitle": "Every euro purchase, at the rate you actually got",
+    "empty": "No exchanges logged yet."
   },
   "tabs": {
     "label": "Sections",

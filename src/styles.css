@@ -106,8 +106,9 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--good-mar
 }
 /* Paint the phone's status-bar band so content never scrolls visibly under it. */
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--page); }
-.cols { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
-.stack { display: grid; gap: 16px; }
+/* Desktop rows: Goals (full width) · De primit | Salary split (equal height) · Exchanges (full width) */
+.cols { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.cols > div > .card { height: 100%; }
 @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; min-width: 0; }
@@ -184,7 +185,14 @@ details.idle { margin-top: 8px; }
 details.idle summary { cursor: pointer; font-size: 13px; color: var(--muted); padding: 4px 0; }
 
 /* Goals */
-.goals { display: grid; gap: 10px; }
+.goals { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); grid-auto-flow: dense; align-items: start; }
+.goal.is-open { grid-column: 1 / -1; }
+.goal-body .rows, .goal-body .goal-tools { max-width: 560px; }
+.exchanges-layout { display: grid; gap: 16px; }
+@media (min-width: 860px) {
+  .exchanges-layout { grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .exchanges-list .exchanges { margin-top: 0; }
+}
 .goal { border: 1px solid var(--border); border-radius: 12px; background: var(--page); overflow: hidden; }
 .goal.is-excluded { border-style: dashed; }
 .goal-summary {
@@ -328,7 +336,7 @@ button.armed { color: var(--bad); border-color: var(--bad); background: var(--ba
 /* ---------- Phones: one section per screen, bottom tab bar ---------- */
 .tabbar { display: none; }
 @media (max-width: 859px) {
-  .cols, .stack { display: contents; }
+  .cols { display: contents; }
   .page [data-section] { display: none; }
   .page[data-tab="overview"] [data-section="overview"],
   .page[data-tab="goals"] [data-section="goals"],

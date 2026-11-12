@@ -12,7 +12,7 @@ import { HistoryChart } from './components/HistoryChart';
 import { AddMonth, HistoryTable } from './components/History';
 import { Receivables } from './components/Receivables';
 import { Goals } from './components/Goals';
-import { SalaryPlan } from './components/SalaryPlan';
+import { Exchanges, SalaryPlan } from './components/SalaryPlan';
 
 const RATE_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -111,13 +111,14 @@ export default function App() {
           <AddMonth data={data} update={update} />
         </section>
 
+        <div data-section="goals"><Goals data={data} update={update} /></div>
+
         <div className="cols">
-          <div data-section="goals"><Goals data={data} update={update} /></div>
-          <div className="stack">
-            <div data-section="receivables"><Receivables data={data} update={update} /></div>
-            <div data-section="plan"><SalaryPlan data={data} update={update} /></div>
-          </div>
+          <div data-section="receivables"><Receivables data={data} update={update} /></div>
+          <div data-section="plan"><SalaryPlan data={data} update={update} /></div>
         </div>
+
+        <div data-section="plan"><Exchanges data={data} update={update} /></div>
 
         <section className="card" data-section="months">
           <header className="card-head"><div><h2>{t('history.months')}</h2></div></header>

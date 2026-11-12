@@ -16,11 +16,8 @@ const fmtRate = (r: number) => r.toFixed(4);
 export function SalaryPlan({ data, update }: { data: AppData; update: Update }) {
   const { t } = useTranslation();
   const setPlan = (patch: Partial<Plan>) => update((d) => ({ ...d, plan: { ...d.plan, ...patch } }));
-  const setExchanges = (fn: (xs: Exchange[]) => Exchange[]) =>
-    update((d) => ({ ...d, plan: { ...d.plan, exchanges: fn(d.plan.exchanges) } }));
   const p = data.plan;
   const s = salaryPlan(data);
-  const list = sortedExchanges(p.exchanges);
 
   return (
     <section className="card">
@@ -63,23 +60,44 @@ export function SalaryPlan({ data, update }: { data: AppData; update: Update }) 
         <p className="hint muted">{t('plan.mismatch', { salaries: p.salaries, count: s.invest.count })}</p>
       )}
 
-      <h3 className="subhead">{t('exchange.title')}</h3>
-      <LogExchange data={data} onAdd={(x) => setExchanges((xs) => [...xs, x])} />
-
-      {list.length > 0 && (
-        <ul className="exchanges">
-          {list.slice(0, VISIBLE).map((x) => <ExchangeRow key={x.id} x={x} setExchanges={setExchanges} />)}
-        </ul>
-      )}
-      {list.length > VISIBLE && (
-        <details className="idle">
-          <summary>{t('exchange.older', { count: list.length - VISIBLE })}</summary>
-          <ul className="exchanges">
-            {list.slice(VISIBLE).map((x) => <ExchangeRow key={x.id} x={x} setExchanges={setExchanges} />)}
-          </ul>
-        </details>
-      )}
       <p className="hint muted">{t('plan.hint')}</p>
+    </section>
+  );
+}
+
+/** The euro purchases behind the salary split: log form beside the list on wide screens. */
+export function Exchanges({ data, update }: { data: AppData; update: Update }) {
+  const { t } = useTranslation();
+  const setExchanges = (fn: (xs: Exchange[]) => Exchange[]) =>
+    update((d) => ({ ...d, plan: { ...d.plan, exchanges: fn(d.plan.exchanges) } }));
+  const list = sortedExchanges(data.plan.exchanges);
+
+  return (
+    <section className="card">
+      <header className="card-head">
+        <div>
+          <h2>{t('exchange.title')}</h2>
+          <p className="muted">{t('exchange.subtitle')}</p>
+        </div>
+      </header>
+      <div className="exchanges-layout">
+        <LogExchange data={data} onAdd={(x) => setExchanges((xs) => [...xs, x])} />
+        <div className="exchanges-list">
+          {list.length > 0 ? (
+            <ul className="exchanges">
+              {list.slice(0, VISIBLE).map((x) => <ExchangeRow key={x.id} x={x} setExchanges={setExchanges} />)}
+            </ul>
+          ) : <p className="muted">{t('exchange.empty')}</p>}
+          {list.length > VISIBLE && (
+            <details className="idle">
+              <summary>{t('exchange.older', { count: list.length - VISIBLE })}</summary>
+              <ul className="exchanges">
+                {list.slice(VISIBLE).map((x) => <ExchangeRow key={x.id} x={x} setExchanges={setExchanges} />)}
+              </ul>
+            </details>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

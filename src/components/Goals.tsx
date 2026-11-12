@@ -70,7 +70,7 @@ function GoalCard({ goal, eurRon, open, onToggle, onChange, onDelete, onTemplate
     onChange((g) => ({ ...g, items: g.items.map((it) => (it.id === id ? { ...it, ...patch } : it)) }));
 
   return (
-    <article className={`goal ${s.done ? 'is-done' : ''} ${goal.countInTotal || past ? '' : 'is-excluded'} ${past ? 'is-past' : ''}`}>
+    <article className={`goal ${open ? 'is-open' : ''} ${s.done ? 'is-done' : ''} ${goal.countInTotal || past ? '' : 'is-excluded'} ${past ? 'is-past' : ''}`}>
       <button className="goal-summary" aria-expanded={open} onClick={onToggle}>
         <span className="goal-name">
           {goal.name}
