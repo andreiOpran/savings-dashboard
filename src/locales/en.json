@@ -94,7 +94,7 @@
     "title": "De primit",
     "subtitle": "Money you're still owed",
     "markReceived": "Mark as received",
-    "markNotReceived": "Mark as not received",
+    "markNotReceived": "They owe me again (past months stay as they are)",
     "who": "Who owes you",
     "amountFor": "Amount for {{label}}",
     "delete": "Delete {{label}}",
@@ -102,8 +102,10 @@
     "idle_other": "{{count}} received or empty",
     "add": "+ Add",
     "newLabel": "New",
-    "moved": "+{{amount}} added to “In accounts” for {{month}} and taken off its de primit. Untick to undo.",
-    "notMoved": "{{month}} isn't recorded yet: the money will show once you record the month with your account totals."
+    "moved": "+{{amount}} added to “In accounts” for {{month}} and taken off its de primit.",
+    "notMoved": "{{month}} isn't recorded yet: the money will show once you record the month with your account totals.",
+    "reopened": "{{label}} owes you again: set the new amount. Past months keep the money that already arrived.",
+    "undo": "Undo"
   },
   "currency": {
     "switch": "Switch currency",

@@ -18,15 +18,21 @@ export function Receivables({ data, update }: { data: AppData; update: Update })
     receivables: [...d.receivables, { id: uid(), label: t('receivables.newLabel'), expr: '0', currency: 'RON', received: false }],
   }));
 
-  const [moved, setMoved] = useState<string | null>(null);
+  /** Feedback after ticking or reopening, with an undo for a tick made by mistake. */
+  const [note, setNote] = useState<{ text: string; undoId?: string; ok?: boolean } | null>(null);
   const toggle = (r: Receivable, received: boolean) => {
     const month = currentMonth();
     const recorded = data.snapshots.some((s) => s.month === month);
     const amount = toRon(num(r.expr), r.currency, data.settings.eurRon);
     update((d) => setReceived(d, r.id, received, month));
-    setMoved(!received || amount === 0 ? null : recorded
-      ? t('receivables.moved', { amount: money(amount), month: monthLabel(month) })
-      : t('receivables.notMoved', { month: monthLabel(month) }));
+    if (!received) setNote({ text: t('receivables.reopened', { label: r.label }) });
+    else if (amount === 0) setNote(null);
+    else if (recorded) setNote({ text: t('receivables.moved', { amount: money(amount), month: monthLabel(month) }), undoId: r.id, ok: true });
+    else setNote({ text: t('receivables.notMoved', { month: monthLabel(month) }), undoId: r.id });
+  };
+  const undo = (id: string) => {
+    update((d) => setReceived(d, id, false, currentMonth(), { undo: true }));
+    setNote(null);
   };
 
   const open = data.receivables.filter((r) => !r.received && num(r.expr) !== 0);
@@ -60,7 +66,12 @@ export function Receivables({ data, update }: { data: AppData; update: Update })
           <ul className="rows">{idle.map(row)}</ul>
         </details>
       )}
-      {moved && <p className="hint moved" role="status">{moved}</p>}
+      {note && (
+        <p className={`hint note ${note.ok ? 'moved' : ''}`} role="status">
+          <span>{note.text}</span>
+          {note.undoId && <button type="button" className="linkish" onClick={() => undo(note.undoId!)}>{t('receivables.undo')}</button>}
+        </p>
+      )}
       <button className="add" onClick={add}>{t('receivables.add')}</button>
     </section>
   );

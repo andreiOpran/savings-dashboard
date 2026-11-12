@@ -119,17 +119,31 @@ describe('receiving money', () => {
     expect(d.snapshots[0].expr).toBe('32119+500');
   });
 
-  it('unticking undoes it exactly', () => {
-    const d = setReceived(setReceived(base(), 'p', true, '2026-11'), 'p', false, '2026-11');
+  it('undo reverses a tick exactly', () => {
+    const d = setReceived(setReceived(base(), 'p', true, '2026-11'), 'p', false, '2026-11', { undo: true });
     expect(d.snapshots[0]).toEqual(base().snapshots[0]);
     expect(d.receivables[0]).toEqual(base().receivables[0]);
   });
 
-  it('unticking after the month was edited subtracts instead', () => {
+  it('undo after the month was edited subtracts instead', () => {
     let d = setReceived(base(), 'p', true, '2026-11');
     d = { ...d, snapshots: [{ ...d.snapshots[0], expr: '35000' }] };
-    d = setReceived(d, 'p', false, '2026-12');
+    d = setReceived(d, 'p', false, '2026-12', { undo: true });
     expect(d.snapshots[0].expr).toBe('35000-2750');
+  });
+
+  it('owing again (untick) reopens the entry but leaves past months alone', () => {
+    const paid = setReceived(base(), 'p', true, '2026-11');
+    let d = setReceived(paid, 'p', false, '2027-01');
+    expect(d.snapshots).toEqual(paid.snapshots); // November keeps the money that arrived
+    expect(d.receivables[0]).toMatchObject({ received: false });
+    expect(d.receivables[0].movedTo).toBeUndefined();
+    // New debt, then paid again in January: only January changes.
+    d = { ...d, receivables: d.receivables.map((r) => (r.id === 'p' ? { ...r, expr: '300' } : r)) };
+    d = { ...d, snapshots: [...d.snapshots, { month: '2027-01', expr: '40000', receivablesExpr: '800', goals: 0 }] };
+    d = setReceived(d, 'p', true, '2027-01');
+    expect(d.snapshots[0]).toEqual(paid.snapshots[0]);
+    expect(d.snapshots[1]).toMatchObject({ expr: '40000+300', receivablesExpr: '800-300' });
   });
 
   it('only flags it when the current month is not recorded', () => {

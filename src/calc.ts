@@ -163,9 +163,15 @@ function adjustExpr(expr: string, delta: number): string {
  * Tick or untick a receivable. Money that arrives moves from de primit into
  * the accounts: when the current month is recorded, its "In accounts" grows by
  * the amount and its recorded de primit shrinks by it, so the real total stays
- * the same. Unticking reverses exactly what was moved.
+ * the same.
+ *
+ * Unticking means "they owe me again": the entry reopens and past months keep
+ * the money that already arrived. Only `undo` (a tick made by mistake)
+ * reverses the move.
  */
-export function setReceived(data: AppData, id: string, received: boolean, month = currentMonth()): AppData {
+export function setReceived(
+  data: AppData, id: string, received: boolean, month = currentMonth(), opts: { undo?: boolean } = {},
+): AppData {
   const r = data.receivables.find((x) => x.id === id);
   if (!r || r.received === received) return data;
   let snapshots = data.snapshots;
@@ -183,7 +189,7 @@ export function setReceived(data: AppData, id: string, received: boolean, month 
         ...(s.receivablesExpr != null && s.receivablesExpr !== '' ? { receivablesExpr: adjustExpr(s.receivablesExpr, -amount) } : {}),
       });
     }
-  } else if (r.movedTo) {
+  } else if (opts.undo && r.movedTo) {
     const { month: m, amount } = r.movedTo;
     snapshots = snapshots.map((s) => s.month !== m ? s : {
       ...s,

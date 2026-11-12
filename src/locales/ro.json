@@ -97,7 +97,7 @@
     "title": "De primit",
     "subtitle": "Bani pe care încă îi ai de primit",
     "markReceived": "Marchează ca primit",
-    "markNotReceived": "Marchează ca neprimit",
+    "markNotReceived": "Îmi datorează din nou (lunile trecute rămân neschimbate)",
     "who": "Cine îți datorează",
     "amountFor": "Suma pentru {{label}}",
     "delete": "Șterge {{label}}",
@@ -106,8 +106,10 @@
     "idle_other": "{{count}} de primite sau goale",
     "add": "+ Adaugă",
     "newLabel": "Nou",
-    "moved": "+{{amount}} adăugați la „În conturi” pentru {{month}} și scăzuți din de primit. Debifează ca să anulezi.",
-    "notMoved": "{{month}} nu e înregistrată încă: banii vor apărea când înregistrezi luna cu totalul din conturi."
+    "moved": "+{{amount}} adăugați la „În conturi” pentru {{month}} și scăzuți din de primit.",
+    "notMoved": "{{month}} nu e înregistrată încă: banii vor apărea când înregistrezi luna cu totalul din conturi.",
+    "reopened": "{{label}} îți datorează din nou: scrie suma nouă. Lunile trecute păstrează banii deja primiți.",
+    "undo": "Anulează"
   },
   "currency": {
     "switch": "Schimbă moneda",
