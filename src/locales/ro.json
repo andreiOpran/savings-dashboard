@@ -154,17 +154,16 @@
     "less": "Unul mai puțin",
     "more": "Unul în plus",
     "perSalary": "Economisit per salariu",
-    "investPerSalary": "Investit per salariu",
-    "xtbFree": "Fonduri libere XTB",
-    "rate": "Curs EUR→RON pentru asta",
-    "rateAria": "Curs EUR fix, gol pentru cursul live",
-    "fixed": "fix",
-    "live": "live",
+    "investPerSalary": "Investiție lunară (implicit)",
     "totalSaved": "Total economisit",
     "inStocks": "În acțiuni",
     "xtbShort": "Liber XTB",
     "onIng": "Pe ING",
-    "hint": "Suma de pe ING se scade din totalul din conturi când înregistrezi o lună."
+    "hint": "Pe ING = total economisit − cât au costat de fapt euro, fiecare schimb la cursul lui. Se scade din totalul din conturi când înregistrezi o lună.",
+    "costAt": "{{ron}} · curs mediu {{rate}}",
+    "mismatch_one": "{{salaries}} salarii economisite, dar {{count}} investiție lunară înregistrată.",
+    "mismatch_few": "{{salaries}} salarii economisite, dar {{count}} investiții lunare înregistrate.",
+    "mismatch_other": "{{salaries}} salarii economisite, dar {{count}} de investiții lunare înregistrate."
   },
   "confirm": {
     "again": "Apasă din nou pentru confirmare",
@@ -175,5 +174,24 @@
     "connecting": "Se conectează…",
     "synced": "Sincronizat cu contul tău claude.ai — aceleași date pe toate dispozitivele.",
     "error": "Contul claude.ai nu poate fi accesat acum. Modificările rămân în acest browser."
+  },
+  "exchange": {
+    "title": "Schimburi valutare",
+    "kind": "Tip schimb",
+    "invest": "Investiție lunară",
+    "xtb": "Fonduri libere XTB",
+    "investShort": "Investiție",
+    "xtbShort": "XTB",
+    "date": "Data",
+    "eur": "Euro",
+    "rate": "Curs (lei per €)",
+    "costs": "Costă {{ron}}",
+    "add": "Adaugă schimb",
+    "imported": "Din spreadsheet",
+    "importedHint": "Importat din spreadsheet: data și cursul real nu se știu (spreadsheet-ul folosea 5). Modifică cursul dacă îl știi.",
+    "older_one": "{{count}} schimb mai vechi",
+    "older_few": "{{count}} schimburi mai vechi",
+    "older_other": "{{count}} de schimburi mai vechi",
+    "delete": "Șterge schimbul"
   }
 }

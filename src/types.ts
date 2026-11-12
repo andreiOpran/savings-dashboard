@@ -50,13 +50,27 @@ export interface Snapshot {
 }
 
 /** The "Numar salariu" block: how the salary savings are split. */
+/** One EUR purchase, at the rate actually paid. The rate is kept as logged. */
+export interface Exchange {
+  id: string;
+  /** YYYY-MM-DD; absent for entries imported from the sheet, whose dates aren't known. */
+  date?: string;
+  /** `invest`: the monthly stock investment; `xtb`: free funds moved to XTB. */
+  kind: 'invest' | 'xtb';
+  /** Euros bought (expression). */
+  eurExpr: string;
+  /** RON per EUR paid for this exchange. */
+  rate: number;
+  note?: string;
+}
+
+/** The "Numar salariu" block: saved salaries, and the euros bought out of them. */
 export interface SalaryPlan {
   salaries: number;
   savingsPerSalary: string;
+  /** Default euro amount when logging the monthly investment. */
   investPerSalaryEur: string;
-  xtbFreeEur: string;
-  /** Fixed EUR→RON rate for this block; empty = use the live rate. */
-  eurRate: string;
+  exchanges: Exchange[];
 }
 
 export interface Settings {

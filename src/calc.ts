@@ -1,6 +1,6 @@
 import { num } from './expr';
 import { uid } from './id';
-import type { AppData, Currency, Goal, Snapshot } from './types';
+import type { AppData, Currency, Exchange, Goal, Snapshot } from './types';
 
 export const toRon = (amount: number, currency: Currency, eurRon: number) =>
   currency === 'EUR' ? amount * eurRon : amount;
@@ -106,14 +106,41 @@ export function history(data: AppData): HistoryRow[] {
     });
 }
 
+export interface ExchangeTotals {
+  count: number;
+  eur: number;
+  /** Lei actually paid, each exchange at its own rate. */
+  ron: number;
+  /** Weighted average rate (ron / eur); 0 when nothing was exchanged. */
+  avgRate: number;
+}
+
+function exchangeTotals(list: Exchange[]): ExchangeTotals {
+  let eur = 0, ron = 0;
+  for (const x of list) {
+    const e = num(x.eurExpr);
+    eur += e;
+    ron += e * x.rate;
+  }
+  return { count: list.length, eur, ron, avgRate: eur ? ron / eur : 0 };
+}
+
+/** ING = salaries saved − what the euro purchases really cost in lei. */
 export function salaryPlan(data: AppData) {
   const p = data.plan;
-  const rate = p.eurRate.trim() ? num(p.eurRate) : data.settings.eurRon;
   const totalSavings = p.salaries * num(p.savingsPerSalary);
-  const investedEur = p.salaries * num(p.investPerSalaryEur);
-  const xtbEur = num(p.xtbFreeEur);
-  const ing = totalSavings - (investedEur + xtbEur) * rate;
-  return { rate, totalSavings, investedEur, xtbEur, ing };
+  const invest = exchangeTotals(p.exchanges.filter((x) => x.kind === 'invest'));
+  const xtb = exchangeTotals(p.exchanges.filter((x) => x.kind === 'xtb'));
+  const ing = totalSavings - invest.ron - xtb.ron;
+  return { totalSavings, invest, xtb, ing };
+}
+
+/** Newest first; undated (imported) entries last, in their original order. */
+export function sortedExchanges(list: Exchange[]): Exchange[] {
+  return list
+    .map((x, i) => ({ x, i }))
+    .sort((a, b) => (b.x.date ?? '').localeCompare(a.x.date ?? '') || a.i - b.i)
+    .map(({ x }) => x);
 }
 
 export function nextMonth(month: string): string {

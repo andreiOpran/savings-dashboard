@@ -269,3 +269,32 @@ button.armed { color: var(--bad); border-color: var(--bad); background: var(--ba
 .rate.stale .rate-input input { color: var(--bad); }
 .rate .icon { width: 26px; height: 26px; font-size: 15px; }
 @media (max-width: 480px) { .rate > .muted { display: none; } }
+
+/* Exchange log */
+.subhead { font-size: 14px; margin: 16px 0 8px; }
+.split small { font-size: 11px; }
+.log-exchange { display: grid; gap: 10px; padding: 12px; border-radius: 12px; background: var(--page); border: 1px solid var(--border); }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; padding: 2px; gap: 2px; justify-self: start; }
+.seg button { border: 0; border-radius: 8px; padding: 5px 10px; font-size: 13px; background: transparent; color: var(--ink-2); }
+.seg button[aria-checked="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--border); }
+.log-fields { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; }
+.log-fields label { display: grid; gap: 4px; font-size: 12px; min-width: 0; }
+.log-fields input { border-color: var(--border); background: var(--surface); padding: 6px 8px; width: 100%; font-variant-numeric: tabular-nums; }
+.log-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.exchanges { list-style: none; margin: 8px 0 0; padding: 0; display: grid; }
+.exchange { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 4px 8px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.exchange:last-child { border-bottom: 0; }
+.ex-when { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.ex-math { display: inline-flex; align-items: center; gap: 2px; font-variant-numeric: tabular-nums; }
+.ex-math .amount.eur input { width: 56px; }
+.ex-math .amount.ex-rate input { width: 64px; }
+.ex-ron { min-width: 72px; text-align: right; font-weight: 600; }
+.badge.invest { color: var(--s1); background: color-mix(in srgb, var(--s1) 12%, transparent); }
+.badge.xtb { color: var(--s2); background: color-mix(in srgb, var(--s2) 12%, transparent); }
+@media (max-width: 420px) {
+  .exchange { grid-template-columns: minmax(0, 1fr) auto; }
+  .ex-math { grid-column: 1 / 2; grid-row: 2; }
+  .exchange > button { grid-row: 1 / 3; grid-column: 2; }
+  .log-fields { grid-template-columns: 1fr 1fr; }
+  .log-fields label:first-child { grid-column: 1 / -1; }
+}

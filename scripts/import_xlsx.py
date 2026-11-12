@@ -121,7 +121,8 @@ def main(path):
     if "Stocks" in wv.sheetnames and isinstance(wv["Stocks"]["Q2"].value, (int, float)):
         eur_ron = round(float(wv["Stocks"]["Q2"].value), 4)
 
-    # Salary plan (A1:E2). The sheet converts EUR with a fixed 5.
+    # Salary plan (A1:E2). The sheet converts EUR with a fixed 5. These are the legacy
+    # fields; the app turns them into individual exchanges at that rate on import.
     plan = {
         "salaries": int(s.value("A2") or 0),
         "savingsPerSalary": "2500",

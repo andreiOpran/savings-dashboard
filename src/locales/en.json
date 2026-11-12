@@ -148,17 +148,15 @@
     "less": "One less",
     "more": "One more",
     "perSalary": "Saved per salary",
-    "investPerSalary": "Invested per salary",
-    "xtbFree": "XTB free funds",
-    "rate": "EUR→RON for this",
-    "rateAria": "Fixed EUR rate, empty for live",
-    "fixed": "fixed",
-    "live": "live",
+    "investPerSalary": "Monthly investment (default)",
     "totalSaved": "Total saved",
     "inStocks": "In stocks",
     "xtbShort": "XTB free",
     "onIng": "On ING",
-    "hint": "The ING amount is subtracted from your accounts total when you record a month."
+    "hint": "On ING = total saved − what the euros really cost, each exchange at its own rate. It's subtracted from your accounts total when you record a month.",
+    "costAt": "{{ron}} · avg. {{rate}}",
+    "mismatch_one": "{{salaries}} salaries saved, but {{count}} monthly investment logged.",
+    "mismatch_other": "{{salaries}} salaries saved, but {{count}} monthly investments logged."
   },
   "confirm": {
     "again": "Click again to confirm",
@@ -169,5 +167,23 @@
     "connecting": "Connecting…",
     "synced": "Synced to your claude.ai account — same data on all your devices.",
     "error": "Can't reach your claude.ai account right now. Changes are kept in this browser."
+  },
+  "exchange": {
+    "title": "Exchanges",
+    "kind": "Exchange type",
+    "invest": "Monthly investment",
+    "xtb": "XTB free funds",
+    "investShort": "Investment",
+    "xtbShort": "XTB",
+    "date": "Date",
+    "eur": "Euros",
+    "rate": "Rate (lei per €)",
+    "costs": "Costs {{ron}}",
+    "add": "Log exchange",
+    "imported": "From the sheet",
+    "importedHint": "Imported from the spreadsheet: the date and real rate aren't known (the sheet used 5). Edit the rate if you know it.",
+    "older_one": "{{count}} older exchange",
+    "older_other": "{{count}} older exchanges",
+    "delete": "Delete exchange"
   }
 }

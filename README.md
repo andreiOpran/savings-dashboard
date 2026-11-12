@@ -5,7 +5,7 @@ A private savings dashboard that replaces the **Economii** sheet of `Economii_mo
 - **Monthly history**: each month record the total in your accounts; the ING salary savings (from the salary split) are subtracted automatically, and de primit is recorded too. Balance = accounts − ING, real total = balance + de primit. Chart of balance, real total, and what the goals need.
 - **De primit**: money people owe you, ticked off when received.
 - **Goals**: budgets with line items (Motor, Echipament, RCA…), per-item *paid* ticks, RON or EUR, progress bars.
-- **Salary split**: the "Numar salariu" block (savings → stocks / XTB / ING).
+- **Salary split**: the "Numar salariu" block. Each euro purchase (the monthly investment around the 5th, or free funds moved to XTB) is logged as its own exchange with the rate actually paid, so the ING amount = salaries saved − what the euros really cost.
 - Amount fields accept spreadsheet-style formulas: `2600+150`, `51*40`, `250*7+200*4`.
 - Live EUR→RON (ECB rate via frankfurter.dev) replaces `GOOGLEFINANCE("CURRENCY:EURRON")`.
 - **Past goals**: finished goals (e.g. last summer's Vacanta) are kept for reference, out of the totals; *Use as template* copies one into a new plan.
